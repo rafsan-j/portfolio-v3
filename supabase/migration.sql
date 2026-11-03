@@ -165,7 +165,7 @@ KEY PROJECTS:
 9. CERN Beamline for Schools: Particle physics experiment using SiPMs and BC-408 scintillators to verify relativistic time dilation.
 10. HAYTHAM X ONE & DCMD Water Purification: CSP solar/hydrogen energy nexus & solar membrane distillation.
 
-CONTACT: rafsan2972jani@gmail.com | +880 1776-132121 | Sylhet & Dinajpur, Bangladesh
+CONTACT: rafsan2972jani@gmail.com | Sylhet & Dinajpur, Bangladesh
 GitHub: https://github.com/rafsan-j | LinkedIn: https://linkedin.com/in/rafsan-jani72'
 ) on conflict (id) do update set system_prompt_text = excluded.system_prompt_text;
 

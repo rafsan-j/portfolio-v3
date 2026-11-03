@@ -15,15 +15,15 @@ const LINKS = [
 
 export const MODES: { id: VisitorMode; label: string; badge?: string; color: string; desc: string }[] = [
   { id: 'developer', label: 'Developer',    color: '#00ff88', desc: 'Cyberpunk terminal & 3D core'       },
-  { id: 'recruiter', label: 'Recruiter',    color: '#2dd4bf', desc: 'Executive brief, metrics & CV'      },
-  { id: 'friend',    label: 'Friend',       color: '#f472b6', desc: 'Casual story, life & highlights'    },
+  { id: 'recruiter', label: 'Recruiter',    color: '#0d9488', desc: 'Executive brief, metrics & CV'      },
+  { id: 'friend',    label: 'Friend',       color: '#ec4899', desc: 'Casual story, life & highlights'    },
   { id: 'game',      label: 'Cyber Lab 3D', badge: 'PLAY', color: '#00d4ff', desc: 'Interactive 3D SOC & defense game' },
 ];
 
 export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { mode, setMode, dark, toggleDark } = useVisitorMode();
+  const { mode, setMode, dark, toggleDark, setAiOpen, visitorCount } = useVisitorMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modeOpen, setModeOpen]     = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -58,18 +58,24 @@ export function NavBar() {
       }}
     >
       <nav className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="font-display text-sm tracking-widest hover:opacity-80 transition-all flex-shrink-0 font-bold"
-          style={{ color: 'var(--c-accent)' }}
-        >
-          RJ<span style={{ color: 'var(--c-muted)' }}>://</span>
-          <span className="hidden sm:inline text-[10px] ml-1.5 font-mono uppercase tracking-widest px-1.5 py-0.5 rounded border"
-            style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}>
-            SUST.CSE
+        {/* Logo + Live Visitor Counter Badge */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href="/"
+            className="font-display text-sm tracking-widest hover:opacity-80 transition-all font-bold"
+            style={{ color: 'var(--c-accent)' }}
+          >
+            RJ<span style={{ color: 'var(--c-muted)' }}>://</span>
+          </Link>
+          <span
+            className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border"
+            style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)', background: 'var(--c-surface)' }}
+            title="Live Portfolio Visits"
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-accent)' }} />
+            {visitorCount !== null ? `${visitorCount.toLocaleString()} visits` : 'SUST.CSE'}
           </span>
-        </Link>
+        </div>
 
         {/* Desktop nav links */}
         <ul className="hidden md:flex items-center gap-1 flex-1 justify-center">
@@ -92,8 +98,22 @@ export function NavBar() {
           })}
         </ul>
 
-        {/* Right controls: Quick 3D Game button + Mode switcher + Dark toggle */}
+        {/* Right controls: Global RJ.AI trigger + 3D Game button + Mode switcher + Dark toggle */}
         <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => setAiOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-mono tracking-wider uppercase rounded border transition-all hover:opacity-85"
+            style={{
+              borderColor: 'var(--c-border)',
+              color: 'var(--c-text)',
+              background: 'var(--c-surface)',
+            }}
+            title="Open RJ.AI Assistant (Groq + Gemini)"
+          >
+            <span style={{ color: 'var(--c-accent)' }}>✦</span>
+            <span>RJ.AI</span>
+          </button>
+
           {mode !== 'game' && (
             <button
               onClick={() => handleSelectMode('game')}
@@ -102,7 +122,6 @@ export function NavBar() {
                 borderColor: 'rgba(0,212,255,0.45)',
                 color: '#00d4ff',
                 background: 'rgba(0,212,255,0.08)',
-                boxShadow: '0 0 12px rgba(0,212,255,0.15)',
               }}
               title="Launch Interactive 3D Cyber-Defense Lab"
             >
@@ -126,7 +145,7 @@ export function NavBar() {
             </button>
           )}
 
-          {/* Mode switcher dropdown */}
+          {/* Theme-aware Mode Switcher Dropdown */}
           <div className="relative" ref={dropRef}>
             <button
               onClick={() => setModeOpen(o => !o)}
@@ -148,17 +167,24 @@ export function NavBar() {
             {modeOpen && (
               <div
                 className="absolute right-0 top-full mt-2 w-64 rounded-lg border overflow-hidden shadow-2xl"
-                style={{ background: '#0d0d12', borderColor: '#1a1a2e', zIndex: 250 }}
+                style={{
+                  background: 'var(--c-panel)',
+                  borderColor: 'var(--c-border)',
+                  zIndex: 250,
+                }}
               >
-                <div className="px-3 py-2 border-b border-[#1a1a2e] text-[10px] font-mono tracking-widest uppercase text-[#8888aa]">
+                <div
+                  className="px-3 py-2 border-b text-[10px] font-mono tracking-widest uppercase"
+                  style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)', background: 'var(--c-surface)' }}
+                >
                   Select Portfolio Persona (4 Modes)
                 </div>
                 {MODES.map(m => (
                   <button
                     key={m.id}
                     onClick={() => handleSelectMode(m.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#151522]"
-                    style={{ borderBottom: '1px solid #1a1a2e' }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-opacity hover:opacity-85 border-b"
+                    style={{ borderColor: 'var(--c-border)' }}
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -166,19 +192,21 @@ export function NavBar() {
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-mono tracking-widest uppercase" style={{ color: m.color }}>
+                        <p className="text-xs font-mono tracking-widest uppercase font-bold" style={{ color: m.color }}>
                           {m.label}
                         </p>
                         {m.badge && (
                           <span
                             className="text-[9px] font-mono px-1.5 py-0.5 rounded font-bold"
-                            style={{ background: `${m.color}22`, color: m.color, border: `1px solid ${m.color}55` }}
+                            style={{ background: `${m.color}20`, color: m.color, border: `1px solid ${m.color}55` }}
                           >
                             {m.badge}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-[#8888aa] mt-0.5 truncate">{m.desc}</p>
+                      <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--c-muted)' }}>
+                        {m.desc}
+                      </p>
                     </div>
                     {mode === m.id && (
                       <span className="ml-auto text-xs font-bold" style={{ color: m.color }}>
@@ -191,21 +219,27 @@ export function NavBar() {
             )}
           </div>
 
-          {/* Keyboard hints */}
-          <div className="hidden lg:flex gap-2 text-[11px] font-mono pl-1" style={{ color: 'var(--c-muted)' }}>
+          <div className="hidden lg:flex gap-1.5 text-[11px] font-mono pl-1" style={{ color: 'var(--c-muted)' }}>
             <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: 'var(--c-border)', background: 'var(--c-panel)' }} title="Command palette">⌘K</kbd>
             <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: 'var(--c-border)', background: 'var(--c-panel)' }} title="Terminal">~</kbd>
           </div>
         </div>
 
-        {/* Mobile hamburger */}
-        <div className="flex md:hidden items-center gap-2 ml-auto">
+        {/* Mobile controls */}
+        <div className="flex md:hidden items-center gap-1.5 ml-auto">
+          <button
+            onClick={() => setAiOpen(true)}
+            className="px-2 py-1 text-[10px] font-mono uppercase rounded border"
+            style={{ borderColor: 'var(--c-border)', color: 'var(--c-accent)', background: 'var(--c-surface)' }}
+          >
+            ✦ AI
+          </button>
           <button
             onClick={() => handleSelectMode(mode === 'game' ? 'developer' : 'game')}
             className="px-2 py-1 text-[10px] font-mono uppercase rounded border"
             style={{ borderColor: '#00d4ff66', color: '#00d4ff', background: 'rgba(0,212,255,0.08)' }}
           >
-            {mode === 'game' ? 'Exit 3D' : '🎮 3D Lab'}
+            {mode === 'game' ? 'Exit 3D' : '🎮 3D'}
           </button>
           <button
             className="p-1.5 rounded border"

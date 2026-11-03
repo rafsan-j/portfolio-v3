@@ -19,7 +19,6 @@ import {
 } from '@/lib/supabase';
 import { DEFAULT_AI_SYSTEM_PROMPT } from '@/lib/fallbackData';
 
-const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASS ?? 'rafsan2972';
 type Tab = 'inbox' | 'projects' | 'archive' | 'posts' | 'map' | 'gallery' | 'knowledge';
 
 function Field({
@@ -1073,11 +1072,22 @@ export default function AdminPage() {
     if (sessionStorage.getItem('pf_admin') === '1') setAuthed(true);
   }, []);
 
-  const login = () => {
-    if (pass === ADMIN_PASS) {
-      setAuthed(true);
-      sessionStorage.setItem('pf_admin', '1');
-    } else alert('Wrong password.');
+  const login = async () => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass }),
+      });
+      if (res.ok) {
+        setAuthed(true);
+        sessionStorage.setItem('pf_admin', '1');
+      } else {
+        alert('Invalid access code.');
+      }
+    } catch {
+      alert('Authentication check failed.');
+    }
   };
 
   if (!authed)

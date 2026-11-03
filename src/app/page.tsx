@@ -3,10 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useVisitorMode, type VisitorMode } from '@/components/ui/VisitorModeProvider';
+import { useVisitorMode } from '@/components/ui/VisitorModeProvider';
 import { NavBar }          from '@/components/layout/NavBar';
 import { WebGLBackground } from '@/components/sections/WebGLBackground';
-import { AIAssistant }     from '@/components/sections/AIAssistant';
 import { FALLBACK_PROJECTS } from '@/lib/fallbackData';
 
 const CyberLabGame = dynamic(() => import('@/components/sections/CyberLabGame'), {
@@ -119,7 +118,6 @@ const TIMELINE = [
   },
 ];
 
-// ── 3D Mouse-Tilt & Cursor-Spotlight Card ─────────────────────────────────────
 function TiltCard({
   children,
   className = '',
@@ -171,20 +169,20 @@ function TiltCard({
   );
 }
 
-// ── RECRUITER MODE ────────────────────────────────────────────────────────────
 function RecruiterPage({
   onAI,
   onLaunchGame,
+  visitorCount,
 }: {
   onAI: () => void;
   onLaunchGame: () => void;
+  visitorCount: number | null;
 }) {
   const featured = FALLBACK_PROJECTS.slice(0, 6);
 
   return (
     <div className="theme-page pt-20 pb-20 px-4" style={{ fontFamily: 'var(--font-sans)' }}>
       <main className="max-w-4xl mx-auto">
-        {/* Executive Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -240,7 +238,6 @@ function RecruiterPage({
           </div>
         </motion.div>
 
-        {/* 4 Key Executive Metrics */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -270,7 +267,6 @@ function RecruiterPage({
           ))}
         </motion.div>
 
-        {/* Experience & Education */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -307,7 +303,6 @@ function RecruiterPage({
           </div>
         </motion.section>
 
-        {/* Selected Projects */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -324,26 +319,33 @@ function RecruiterPage({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featured.map(p => (
-              <div key={p.id} className="panel p-5 flex flex-col">
-                <h3 className="font-semibold text-base mb-1.5" style={{ color: 'var(--c-text)' }}>
-                  {p.title}
-                </h3>
-                <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: 'var(--c-muted)' }}>
-                  {p.description}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.tech_stack.slice(0, 5).map(t => (
-                    <span key={t} className="tag tag-neon text-[10px]">
-                      {t}
-                    </span>
-                  ))}
+              <Link key={p.id} href="/lab" className="panel overflow-hidden flex flex-col hover:-translate-y-0.5 transition-all">
+                {p.cover_image_url && (
+                  <div className="w-full h-28 border-b overflow-hidden" style={{ borderColor: 'var(--c-border)' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.cover_image_url} alt={p.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3 className="font-semibold text-base mb-1.5" style={{ color: 'var(--c-text)' }}>
+                    {p.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: 'var(--c-muted)' }}>
+                    {p.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.tech_stack.slice(0, 5).map(t => (
+                      <span key={t} className="tag tag-neon text-[10px]">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </motion.section>
 
-        {/* Technical Skills */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -371,7 +373,6 @@ function RecruiterPage({
           </div>
         </motion.section>
 
-        {/* Footer */}
         <div
           className="pt-8 border-t flex flex-wrap items-center justify-between gap-4 text-xs"
           style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}
@@ -387,14 +388,15 @@ function RecruiterPage({
               LinkedIn (rafsan-jani72)
             </a>
           </div>
-          <span>Sylhet, Bangladesh</span>
+          <span>
+            Sylhet, Bangladesh {visitorCount !== null ? `· ${visitorCount.toLocaleString()} portfolio visits` : ''}
+          </span>
         </div>
       </main>
     </div>
   );
 }
 
-// ── FRIEND MODE ───────────────────────────────────────────────────────────────
 function FriendPage({
   onAI,
   onLaunchGame,
@@ -489,7 +491,6 @@ function FriendPage({
             </div>
           </div>
 
-          {/* 3D Game Invite Card */}
           <div className="panel p-4 mb-6 flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-bold" style={{ color: 'var(--c-text)' }}>
@@ -530,13 +531,14 @@ function FriendPage({
   );
 }
 
-// ── DEVELOPER MODE ────────────────────────────────────────────────────────────
 function DeveloperPage({
   onAI,
   onLaunchGame,
+  visitorCount,
 }: {
   onAI: () => void;
   onLaunchGame: () => void;
+  visitorCount: number | null;
 }) {
   const [statusIdx, setStatusIdx] = useState(0);
   const [time, setTime]           = useState('');
@@ -567,7 +569,6 @@ function DeveloperPage({
       <WebGLBackground />
       <NavBar />
       <main className="relative z-10 min-h-screen px-4 pb-20 max-w-6xl mx-auto pt-24">
-        {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -642,7 +643,6 @@ function DeveloperPage({
           </div>
         </motion.div>
 
-        {/* 3D Tilt Bento Navigation Grid */}
         <section className="mb-16">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs tracking-widest font-mono text-[#8888aa]">
@@ -686,7 +686,6 @@ function DeveloperPage({
           </div>
         </section>
 
-        {/* Scroll-Animated Featured Engineering Builds */}
         <section className="mb-16">
           <div className="flex items-center justify-between mb-5">
             <div>
@@ -715,25 +714,33 @@ function DeveloperPage({
                 >
                   <TiltCard glowColor="#00d4ff" className="h-full">
                     <Link href="/lab" className="block h-full">
-                      <div className="panel p-5 h-full flex flex-col hover:border-[#00d4ff]/40">
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-widest">
-                            BUILD 0{idx + 1}
-                          </span>
-                          <span className="tag tag-amber text-[9px]">Featured</span>
-                        </div>
-                        <h3 className="font-display text-sm font-bold text-[#e8e8f0] mb-2">
-                          {proj.title}
-                        </h3>
-                        <p className="text-xs text-[#8888aa] leading-relaxed mb-4 flex-1 line-clamp-3">
-                          {proj.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1 mt-auto">
-                          {proj.tech_stack.slice(0, 4).map(t => (
-                            <span key={t} className="tag tag-cyan text-[9px]">
-                              {t}
+                      <div className="panel overflow-hidden h-full flex flex-col hover:border-[#00d4ff]/40">
+                        {proj.cover_image_url && (
+                          <div className="w-full h-28 border-b border-[#1a1a2e] overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={proj.cover_image_url} alt={proj.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="p-5 flex-1 flex flex-col">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[10px] font-mono text-[#00ff88] uppercase tracking-widest">
+                              BUILD 0{idx + 1}
                             </span>
-                          ))}
+                            <span className="tag tag-amber text-[9px]">Featured</span>
+                          </div>
+                          <h3 className="font-display text-sm font-bold text-[#e8e8f0] mb-2">
+                            {proj.title}
+                          </h3>
+                          <p className="text-xs text-[#8888aa] leading-relaxed mb-4 flex-1 line-clamp-3">
+                            {proj.description}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-auto">
+                            {proj.tech_stack.slice(0, 4).map(t => (
+                              <span key={t} className="tag tag-cyan text-[9px]">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -743,7 +750,6 @@ function DeveloperPage({
           </div>
         </section>
 
-        {/* Scroll-Animated Trajectory & Leadership Timeline */}
         <section className="mb-16">
           <p className="text-xs tracking-widest font-mono text-[#00d4ff] mb-1">
             // OPERATIONAL LOG
@@ -782,7 +788,6 @@ function DeveloperPage({
           </div>
         </section>
 
-        {/* Bottom Shortcut Bar */}
         <div
           className="text-center text-xs tracking-widest border-t pt-8 font-mono"
           style={{ color: '#8888aa', borderColor: '#1a1a2e' }}
@@ -802,43 +807,50 @@ function DeveloperPage({
           >
             Launch 3D Cyber Lab
           </button>
+          {visitorCount !== null && (
+            <span className="ml-3 text-[#4a4a6a]">· {visitorCount.toLocaleString()} visits</span>
+          )}
         </div>
       </main>
     </>
   );
 }
 
-// ── ROOT HOMEPAGE ─────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const { mode, setMode } = useVisitorMode();
-  const [showAI, setShowAI] = useState(false);
-
+  const { mode, setMode, setAiOpen, visitorCount } = useVisitorMode();
   const launchGame = () => setMode('game');
 
   return (
     <>
       {mode === 'developer' && (
-        <DeveloperPage onAI={() => setShowAI(true)} onLaunchGame={launchGame} />
+        <DeveloperPage
+          onAI={() => setAiOpen(true)}
+          onLaunchGame={launchGame}
+          visitorCount={visitorCount}
+        />
       )}
       {mode === 'recruiter' && (
         <>
           <NavBar />
-          <RecruiterPage onAI={() => setShowAI(true)} onLaunchGame={launchGame} />
+          <RecruiterPage
+            onAI={() => setAiOpen(true)}
+            onLaunchGame={launchGame}
+            visitorCount={visitorCount}
+          />
         </>
       )}
       {mode === 'friend' && (
         <>
           <NavBar />
-          <FriendPage onAI={() => setShowAI(true)} onLaunchGame={launchGame} />
+          <FriendPage onAI={() => setAiOpen(true)} onLaunchGame={launchGame} />
         </>
       )}
       {mode === 'game' && (
         <>
           <NavBar />
-          <CyberLabGame onOpenAI={() => setShowAI(true)} />
+          <CyberLabGame onOpenAI={() => setAiOpen(true)} />
         </>
       )}
-      {showAI && <AIAssistant onClose={() => setShowAI(false)} mode={mode} />}
     </>
   );
 }

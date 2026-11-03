@@ -56,7 +56,7 @@ function FormattedMessage({ text }: { text: string }) {
               if (isBullet) {
                 return (
                   <div key={j} style={{ display: 'flex', gap: '8px', marginBottom: '4px', paddingLeft: '4px' }}>
-                    <span style={{ color: 'currentColor', opacity: 0.6, flexShrink: 0, marginTop: '1px' }}>▸</span>
+                    <span style={{ color: 'var(--c-accent)', flexShrink: 0, marginTop: '1px' }}>▸</span>
                     <span>{clean}</span>
                   </div>
                 );
@@ -144,36 +144,14 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
     }
   };
 
-  const theme = {
-    developer: {
-      panelBg: '#111118', headerBg: '#0d0d12', headerBdr: '#1a1a2e',
-      accent: '#00ff88', title: '// RJ.AI (GROQ + GEMINI)',
-      userBg: 'rgba(0,255,136,0.08)', userBdr: 'rgba(0,255,136,0.25)', userColor: '#e8e8f0',
-      aiBg: '#0d0d12', aiBdr: '#1a1a2e', aiColor: '#c0c0d8',
-      inputBg: '#0d0d12', inputBdr: '#1a1a2e', inputColor: '#e8e8f0',
-    },
-    game: {
-      panelBg: '#07101e', headerBg: '#03060c', headerBdr: '#162a45',
-      accent: '#00d4ff', title: '// SOC NEURAL CORE (RJ.AI)',
-      userBg: 'rgba(0,212,255,0.12)', userBdr: 'rgba(0,212,255,0.3)', userColor: '#e8f4ff',
-      aiBg: '#0a1526', aiBdr: '#162a45', aiColor: '#b8d4f0',
-      inputBg: '#03060c', inputBdr: '#162a45', inputColor: '#e8f4ff',
-    },
-    recruiter: {
-      panelBg: '#ffffff', headerBg: '#f1f5f9', headerBdr: '#e2e8f0',
-      accent: '#0f766e', title: 'AI PORTFOLIO REPRESENTATIVE',
-      userBg: '#0f172a', userBdr: '#0f172a', userColor: '#ffffff',
-      aiBg: '#f8fafc', aiBdr: '#e2e8f0', aiColor: '#1e293b',
-      inputBg: '#f8fafc', inputBdr: '#cbd5e1', inputColor: '#0f172a',
-    },
-    friend: {
-      panelBg: '#1a0f2e', headerBg: '#2d1f4a', headerBdr: '#3d2a5a',
-      accent: '#f472b6', title: 'Ask Rafsan’s AI ✨',
-      userBg: 'rgba(244,114,182,0.15)', userBdr: 'rgba(244,114,182,0.35)', userColor: '#f5d0fe',
-      aiBg: '#2d1f4a', aiBdr: '#3d2a5a', aiColor: '#e9d5ff',
-      inputBg: '#2d1f4a', inputBdr: '#3d2a5a', inputColor: '#f5d0fe',
-    },
-  }[mode];
+  const titleLabel =
+    mode === 'recruiter'
+      ? 'AI PORTFOLIO REPRESENTATIVE (RJ.AI)'
+      : mode === 'friend'
+      ? 'Ask Rafsan’s AI ✨'
+      : mode === 'game'
+      ? '// SOC NEURAL CORE (RJ.AI)'
+      : '// RJ.AI (GROQ + GEMINI)';
 
   return (
     <AnimatePresence>
@@ -181,129 +159,76 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 500,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          padding: '1rem',
-          background: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(8px)',
-        }}
+        className="fixed inset-0 z-[500] flex items-end justify-center p-4 bg-black/70 backdrop-blur-md"
         onClick={e => e.target === e.currentTarget && onClose()}
       >
         <motion.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40 }}
+          className="w-full max-w-[540px] h-[550px] flex flex-col rounded-xl overflow-hidden shadow-2xl border"
           style={{
-            width: '100%',
-            maxWidth: '540px',
-            height: '550px',
-            display: 'flex',
-            flexDirection: 'column',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            background: theme.panelBg,
-            border: `1px solid ${theme.headerBdr}`,
-            boxShadow: '0 25px 60px rgba(0,0,0,0.55)',
+            background: 'var(--c-panel)',
+            borderColor: 'var(--c-border)',
+            color: 'var(--c-text)',
           }}
         >
-          {/* Header */}
+          {/* Header — automatically adapts to Light & Dark mode in all 4 personas */}
           <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 16px',
-              borderBottom: `1px solid ${theme.headerBdr}`,
-              background: theme.headerBg,
-              flexShrink: 0,
-            }}
+            className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
+            style={{ background: 'var(--c-surface)', borderColor: 'var(--c-border)' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="flex items-center gap-2">
+              <span className="status-dot" />
               <span
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: theme.accent,
-                  boxShadow: `0 0 6px ${theme.accent}`,
-                  flexShrink: 0,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontFamily: 'monospace',
-                  letterSpacing: '0.1em',
-                  color: theme.accent,
-                }}
+                className="text-[11px] font-mono tracking-widest uppercase font-semibold"
+                style={{ color: 'var(--c-accent)' }}
               >
-                {theme.title}
+                {titleLabel}
               </span>
             </div>
             <button
               onClick={onClose}
-              style={{
-                fontSize: '11px',
-                color: theme.aiColor,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                letterSpacing: '0.05em',
-              }}
+              className="text-xs font-mono px-2 py-0.5 rounded border transition-opacity hover:opacity-75"
+              style={{ color: 'var(--c-muted)', borderColor: 'var(--c-border)' }}
             >
               ✕ Close
             </button>
           </div>
 
           {/* Messages */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-            }}
-          >
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
             {messages.map((m, i) => (
               <div
                 key={i}
-                style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}
+                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  style={{
-                    maxWidth: '86%',
-                    fontSize: '12.5px',
-                    padding: '10px 13px',
-                    borderRadius: '8px',
-                    border: `1px solid ${m.role === 'user' ? theme.userBdr : theme.aiBdr}`,
-                    background: m.role === 'user' ? theme.userBg : theme.aiBg,
-                    color: m.role === 'user' ? theme.userColor : theme.aiColor,
-                  }}
+                  className="max-w-[86%] text-xs px-3.5 py-2.5 rounded-lg border"
+                  style={
+                    m.role === 'user'
+                      ? {
+                          background: 'var(--c-tag-bg)',
+                          borderColor: 'var(--c-tag-border)',
+                          color: 'var(--c-text)',
+                        }
+                      : {
+                          background: 'var(--c-surface)',
+                          borderColor: 'var(--c-border)',
+                          color: 'var(--c-text)',
+                        }
+                  }
                 >
                   {m.role === 'assistant' && (
                     <span
-                      style={{
-                        fontSize: '9px',
-                        letterSpacing: '0.1em',
-                        color: theme.accent,
-                        fontFamily: 'monospace',
-                        display: 'block',
-                        marginBottom: '6px',
-                        opacity: 0.85,
-                      }}
+                      className="text-[9px] tracking-widest font-mono block mb-1 font-bold"
+                      style={{ color: 'var(--c-accent)' }}
                     >
                       RJ.AI
                     </span>
                   )}
                   {m.role === 'assistant' && loading && i === messages.length - 1 && m.content === '' ? (
-                    <span style={{ animation: 'pulse 1s ease-in-out infinite', opacity: 0.6 }}>▋</span>
+                    <span className="animate-pulse opacity-60">▋</span>
                   ) : (
                     <FormattedMessage text={m.content} />
                   )}
@@ -315,23 +240,17 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
 
           {/* Starter questions */}
           {messages.length <= 1 && (
-            <div style={{ padding: '0 16px 12px', display: 'flex', flexWrap: 'wrap', gap: '6px', flexShrink: 0 }}>
+            <div className="px-4 pb-3 flex flex-wrap gap-1.5 flex-shrink-0">
               {(STARTERS[mode] ?? STARTERS.developer).map(q => (
                 <button
                   key={q}
                   onClick={() => send(q)}
+                  className="text-[10.5px] px-2.5 py-1 rounded border transition-opacity hover:opacity-80 text-left"
                   style={{
-                    fontSize: '10.5px',
-                    padding: '5px 10px',
-                    cursor: 'pointer',
-                    border: `1px solid ${theme.headerBdr}`,
-                    color: theme.aiColor,
-                    background: theme.headerBg,
-                    borderRadius: '4px',
-                    transition: 'opacity 0.15s',
+                    borderColor: 'var(--c-border)',
+                    color: 'var(--c-muted)',
+                    background: 'var(--c-surface)',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                 >
                   {q}
                 </button>
@@ -340,19 +259,15 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
           )}
 
           {/* Input */}
-          <div style={{ padding: '12px 16px', borderTop: `1px solid ${theme.headerBdr}`, flexShrink: 0 }}>
+          <div
+            className="p-3 border-t flex-shrink-0"
+            style={{ borderColor: 'var(--c-border)', background: 'var(--c-panel)' }}
+          >
             <div
-              style={{
-                display: 'flex',
-                gap: '8px',
-                alignItems: 'center',
-                border: `1px solid ${theme.inputBdr}`,
-                borderRadius: '8px',
-                padding: '8px 12px',
-                background: theme.inputBg,
-              }}
+              className="flex gap-2 items-center border rounded-lg px-3 py-2"
+              style={{ borderColor: 'var(--c-border)', background: 'var(--c-surface)' }}
             >
-              <span style={{ fontSize: '11px', color: theme.accent, fontFamily: 'monospace', flexShrink: 0 }}>
+              <span className="text-xs font-mono flex-shrink-0" style={{ color: 'var(--c-accent)' }}>
                 &gt;
               </span>
               <input
@@ -361,29 +276,14 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
                 placeholder="Ask about Rafsan, Kairyn, SUST, Waffle Up..."
                 autoFocus
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '13px',
-                  fontFamily: 'monospace',
-                  color: theme.inputColor,
-                }}
+                className="flex-1 bg-transparent border-none outline-none text-xs font-mono"
+                style={{ color: 'var(--c-text)' }}
               />
               <button
                 onClick={() => send()}
                 disabled={loading}
-                style={{
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  letterSpacing: '0.1em',
-                  color: loading ? theme.aiColor : theme.accent,
-                  background: 'none',
-                  border: 'none',
-                  cursor: loading ? 'default' : 'pointer',
-                  opacity: loading ? 0.4 : 1,
-                }}
+                className="text-[10px] font-mono tracking-widest uppercase font-bold disabled:opacity-40"
+                style={{ color: 'var(--c-accent)' }}
               >
                 {loading ? '...' : 'SEND'}
               </button>
@@ -391,10 +291,6 @@ export function AIAssistant({ onClose, mode = 'developer' }: Props) {
           </div>
         </motion.div>
       </motion.div>
-
-      <style>{`
-        @keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
-      `}</style>
     </AnimatePresence>
   );
 }

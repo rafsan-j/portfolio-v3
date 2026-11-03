@@ -50,9 +50,40 @@ AWARDS & HONORS:
 - Bangladesh Junior Science Olympiad (BdJSO) National Winner (2020)
 
 CONTACT:
-- Email: rafsan2972jani@gmail.com | Phone: +880 1776-132121
+- Email: rafsan2972jani@gmail.com
 - GitHub: https://github.com/rafsan-j | LinkedIn: https://linkedin.com/in/rafsan-jani72
 - Resume: Available at /resume.pdf`;
+
+function makeSvgDataUri(svg: string): string {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg.trim())}`;
+}
+
+export function makeProjectBanner(code: string, accent: string, sub: string): string {
+  return makeSvgDataUri(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#070b14"/>
+          <stop offset="100%" stop-color="#0d1526"/>
+        </linearGradient>
+      </defs>
+      <rect width="640" height="220" fill="url(#bg)"/>
+      <g stroke="${accent}" stroke-opacity="0.16" stroke-width="1">
+        <line x1="0" y1="55" x2="640" y2="55"/>
+        <line x1="0" y1="110" x2="640" y2="110"/>
+        <line x1="0" y1="165" x2="640" y2="165"/>
+        <line x1="160" y1="0" x2="160" y2="220"/>
+        <line x1="320" y1="0" x2="320" y2="220"/>
+        <line x1="480" y1="0" x2="480" y2="220"/>
+      </g>
+      <circle cx="520" cy="110" r="68" fill="none" stroke="${accent}" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <circle cx="520" cy="110" r="42" fill="${accent}" fill-opacity="0.08" stroke="${accent}" stroke-opacity="0.6" stroke-width="1.5"/>
+      <text x="32" y="88" fill="${accent}" font-family="monospace" font-size="22" font-weight="bold" letter-spacing="3">${code}</text>
+      <text x="32" y="126" fill="#e8e8f0" font-family="monospace" font-size="14" letter-spacing="1">${sub}</text>
+      <rect x="32" y="152" width="84" height="3" fill="${accent}" fill-opacity="0.8"/>
+    </svg>
+  `);
+}
 
 export const FALLBACK_PROJECTS: Project[] = [
   {
@@ -70,6 +101,7 @@ export const FALLBACK_PROJECTS: Project[] = [
     ],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// KAIRYN v5.1 OS', '#00ff88', '60 FPS 3D Shaders · Self-Healing Widgets · OLS Forecast'),
     case_study: `PROBLEM:
 Conventional mobile habit trackers suffer from passive drop-off, widget token desynchronization, and battery-draining live wallpapers on 120Hz OLED displays.
 
@@ -90,6 +122,7 @@ ARCHITECTURE & ENGINEERING:
     tech_stack: ['Next.js', 'React', 'TypeScript', 'Supabase', 'Tailwind CSS', 'PostgreSQL'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// S_TRACK ACADEMIC OS', '#00d4ff', 'SUST CSE Syllabus · Discrete Math · CP Velocity'),
     case_study: `PROBLEM:
 University engineering coursework across Structured Programming (C), Discrete Mathematics, lab evaluations, and competitive programming judges (Codeforces, VJudge, AtCoder) is scattered across disconnected syllabi and spreadsheets.
 
@@ -114,6 +147,7 @@ ARCHITECTURE & IMPACT:
     ],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// PARALLAX MASCOT 3D', '#f472b6', 'Gyroscope Sensor Fusion · Flood-Fill Alpha Matting'),
     case_study: `PROBLEM:
 Delivering tactile, depth-reactive 3D character cards on Android typically requires a heavy Unity/OpenGL runtime or manually pre-sliced multi-layer PSD assets.
 
@@ -133,6 +167,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Python', 'Flask', 'Bayesian Regression', 'PostgreSQL', 'Data Analysis'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// AGRIBASE ML', '#34d399', '50,000+ Records · Bayesian Regression · IWC Bronze'),
     case_study: `PROBLEM:
 Smallholder farmers in Bangladesh face severe post-harvest crop waste and unpredictable yield fluctuations due to fragmented historical data and lack of localized forecasting tools.
 
@@ -152,6 +187,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Python', 'Selenium', 'Web Automation', 'REST APIs', 'JSON'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// PUNORABRITTI', '#ffb400', 'Real-Time Route Polling · Seat Matrix Telemetry'),
     case_study: `PROBLEM:
 Peak-season intercity transit tickets between Dhaka, Sylhet, and Dinajpur sell out within minutes of release, requiring repetitive manual checking across multiple operator schedules.
 
@@ -169,6 +205,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Python', 'Manim', 'NumPy', 'SciPy', 'Audio DSP', 'FFmpeg'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// MANIM + AUDIO DSP', '#a78bfa', '60 FPS Cavalieri Proof · 48kHz NumPy/SciPy Synth'),
     case_study: `PROBLEM:
 Educational math animations often rely on generic stock music that fails to synchronize with geometric transformations and theorem beats.
 
@@ -187,6 +224,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['JavaScript', 'HTML5/CSS3', 'Local JSON DB', 'Print Engine'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// CLINICAL RX ENGINE', '#38bdf8', 'Zero-Latency Offline Drug Index · Print Layout'),
     case_study: `PROBLEM:
 Clinical practices in regional areas experience intermittent connectivity, making cloud-only EMR and prescription tools unreliable during high-volume patient consultation hours.
 
@@ -204,6 +242,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Arduino Uno', 'C/C++', 'Optical LDR Sensors', 'Bio-Char Filtration', 'IoT'],
     github_url: 'https://github.com/rafsan-j',
     live_url: '',
+    cover_image_url: makeProjectBanner('// PROJECT CLEARRIVER', '#2dd4bf', 'Arduino Optical Turbidity Array · Bio-Char Filtration'),
     case_study: `PROBLEM:
 Low-cost rural water filters lack real-time saturation and turbidity diagnostics, leaving households unsure when filtration media is exhausted.
 
@@ -221,6 +260,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Particle Physics', 'SiPM Sensors', 'BC-408 Scintillators', 'Python', 'Data Analysis'],
     github_url: '',
     live_url: '',
+    cover_image_url: makeProjectBanner('// CERN T9 BEAMLINE', '#fb923c', 'BC-408 Scintillators · SiPM Time-of-Flight Telemetry'),
     case_study: `PROBLEM:
 Measuring relativistic time dilation of secondary cosmic and beamline muons requires nanosecond-level coincidence timing and momentum-filtered decay analysis.
 
@@ -238,6 +278,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Python', 'AI/ML', 'IoT', 'ESP32', 'Solar Engineering'],
     github_url: '',
     live_url: '',
+    cover_image_url: makeProjectBanner('// HAYTHAM X ONE', '#facc15', 'CSP Heliostat Array · AI Load Dispatch · Green H2'),
     case_study: `Designed an integrated renewable energy nexus pairing dual-axis heliostat tracking with predictive AI dispatch and excess thermal-to-hydrogen conversion to address grid intermittency in Bangladesh.`,
     is_featured: false,
     sort_order: 10,
@@ -251,6 +292,7 @@ ARCHITECTURE & IMPACT:
     tech_stack: ['Environmental Engineering', 'Arduino', 'Sensor Integration', 'Thermodynamics'],
     github_url: '',
     live_url: '',
+    cover_image_url: makeProjectBanner('// DCMD SOLAR PURIFIER', '#38bdf8', 'Membrane Distillation · Parabolic Solar Reflectors'),
     case_study: `Engineered a decentralized solar-thermal desalination and arsenic removal unit using hydrophobic PTFE membranes and parabolic solar concentrators.`,
     is_featured: false,
     sort_order: 11,
@@ -263,7 +305,7 @@ export const FALLBACK_ARCHIVE: ArchiveEntry[] = [
     id: 'arch-manim-invariance',
     title: 'Euclidean & Cavalieri Area Invariance — Programmatic Visual Proof & DSP Synthesis',
     abstract_content:
-      'A computational geometry and digital signal processing project demonstrating that triangles sharing an equal base and parallel altitude preserve constant area (A = 1/2 bh). Combines Cavalieri cross-sectional micro-slice shearing and Euclidean parallelogram doubling in Manim with frame-accurate 48 kHz procedural audio synthesis in NumPy/SciPy.',
+      'A computational geometry and digital signal processing project demonstrating that triangles sharing an equal base and parallel altitude preserve constant area (A = ½bh). Combines Cavalieri cross-sectional micro-slice shearing and Euclidean parallelogram doubling in Manim with frame-accurate 48 kHz procedural audio synthesis in NumPy/SciPy.',
     tags: ['Mathematics', 'Manim', 'Computational Geometry', 'Python', 'Audio DSP'],
     date_completed: '2026-10-23',
   },
@@ -309,6 +351,7 @@ export const FALLBACK_ARCHIVE: ArchiveEntry[] = [
   },
 ];
 
+// Clean MDX-safe content (zero unescaped curly braces `{...}` so next-mdx-remote@6.0.0 never throws)
 export const FALLBACK_POSTS: InkwellPost[] = [
   {
     id: 'post-3d-canvas-shaders',
@@ -328,7 +371,7 @@ Bringing a 3D live wallpaper to Android usually means spinning up a heavy \`GLSu
 
 ## The 3D Perspective Projection Pipeline
 
-Every vertex $(x, y, z)$ in Kairyn's 3D scenes passes through two rotation matrices—pitch $R_x(\\theta_x)$ and yaw $R_y(\\theta_y)$—followed by perspective division:
+Every vertex **(x, y, z)** in Kairyn's 3D scenes passes through two rotation matrices—pitch **Rₓ(θₓ)** and yaw **Rᵧ(θᵧ)**—followed by perspective division:
 
 \`\`\`
 scale = fov / (fov + z_rot + cameraDistance)
@@ -336,12 +379,12 @@ screenX = centerX + x_rot * scale
 screenY = centerY + y_rot * scale
 \`\`\`
 
-By pre-allocating primitive \`FloatArray\` buffers and sorting edges by transformed $z$-depth without creating boxed objects inside \`Choreographer.FrameCallback\`, the garbage collector never pauses a single frame.
+By pre-allocating primitive \`FloatArray\` buffers and sorting edges by transformed z-depth without creating boxed objects inside \`Choreographer.FrameCallback\`, the garbage collector never pauses a single frame.
 
 ## 5 Mathematical Worlds
 
-1. **3D Plexus (Fibonacci Geodesic Sphere)**: 88 vertices distributed via the Golden Angle $\\phi = \\pi(3 - \\sqrt{5})$ with harmonic surface wave displacement.
-2. **3D Lorenz Strange Attractor**: 160 segments tracing the chaotic differential system $dx/dt = \\sigma(y - x)$, $dy/dt = x(\\rho - z) - y$, $dz/dt = xy - \\beta z$ with glowing orbital energy pulses.
+1. **3D Plexus (Fibonacci Geodesic Sphere)**: 88 vertices distributed via the Golden Angle **φ = π(3 − √5)** with harmonic surface wave displacement.
+2. **3D Lorenz Strange Attractor**: 160 segments tracing the chaotic differential system **dx/dt = σ(y − x)**, **dy/dt = x(ρ − z) − y**, **dz/dt = xy − βz** with glowing orbital energy pulses.
 3. **3D Aurora Silk**: 6 parametric ribbon curtains rendered with additive bioluminescent bloom.
 4. **3D Curl-Noise Flow Field**: Depth-sorted particles streaming through a trigonometric vector field with velocity-aligned motion streaks.
 5. **3D Topographic Horizon**: A 19×11 perspective wireframe wave receding into the horizon.
@@ -473,11 +516,6 @@ export const FALLBACK_MAP_LOCATIONS: MapLocation[] = [
     is_wishlist: true,
   },
 ];
-
-// Self-contained SVG data-URI artworks so the Gallery (/visuals) looks rich immediately out of the box
-function makeSvgDataUri(svg: string): string {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg.trim())}`;
-}
 
 export const FALLBACK_GALLERY_IMAGES: GalleryImage[] = [
   {

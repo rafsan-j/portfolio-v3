@@ -34,6 +34,13 @@ const mdxComponents = {
   ),
 };
 
+// Sanitize raw curly braces in plain Markdown/LaTeX so next-mdx-remote@6.0.0 never throws on {expr}
+function sanitizeMdxSource(raw: string): string {
+  return raw
+    .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+    .replace(/\{([^{}<>]+)\}/g, '($1)');
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getInkwellPostBySlug(params.slug);
   return { title: post?.title ?? 'Post', description: post?.excerpt };
@@ -42,6 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const post = await getInkwellPostBySlug(params.slug);
   if (!post) notFound();
+
+  const safeContent = sanitizeMdxSource(post.content ?? '');
 
   return (
     <div className="theme-page">
@@ -75,7 +84,7 @@ export default async function PostPage({ params }: Props) {
             <div className="h-px" style={{ background: 'var(--c-border)' }} />
           </header>
           <div className="mdx-content">
-            <MDXRemote source={post.content} components={mdxComponents} />
+            <MDXRemote source={safeContent} components={mdxComponents} />
           </div>
         </article>
       </main>

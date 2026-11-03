@@ -1,29 +1,38 @@
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { AIAssistant } from '@/components/sections/AIAssistant';
 
 export type VisitorMode = 'developer' | 'recruiter' | 'friend' | 'game';
 
 const VALID_MODES: VisitorMode[] = ['developer', 'recruiter', 'friend', 'game'];
 
 interface Ctx {
-  mode:       VisitorMode;
-  setMode:    (m: VisitorMode) => void;
-  dark:       boolean;
-  setDark:    (d: boolean) => void;
-  toggleDark: () => void;
+  mode:         VisitorMode;
+  setMode:      (m: VisitorMode) => void;
+  dark:         boolean;
+  setDark:      (d: boolean) => void;
+  toggleDark:   () => void;
+  aiOpen:       boolean;
+  setAiOpen:    (open: boolean) => void;
+  visitorCount: number | null;
 }
 
 const VisitorCtx = createContext<Ctx>({
-  mode:       'developer',
-  setMode:    () => {},
-  dark:       true,
-  setDark:    () => {},
-  toggleDark: () => {},
+  mode:         'developer',
+  setMode:      () => {},
+  dark:         true,
+  setDark:      () => {},
+  toggleDark:   () => {},
+  aiOpen:       false,
+  setAiOpen:    () => {},
+  visitorCount: null,
 });
 
 export function VisitorModeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<VisitorMode>('developer');
-  const [dark, setDarkState] = useState<boolean>(true);
+  const [mode, setModeState]       = useState<VisitorMode>('developer');
+  const [dark, setDarkState]       = useState<boolean>(true);
+  const [aiOpen, setAiOpen]        = useState<boolean>(false);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   const applyTheme = useCallback((m: VisitorMode, d: boolean) => {
     if (typeof document === 'undefined') return;
@@ -45,6 +54,19 @@ export function VisitorModeProvider({ children }: { children: React.ReactNode })
     setModeState(resolvedMode);
     setDarkState(resolvedDark);
     applyTheme(resolvedMode, resolvedDark);
+
+    // Wire up live visitor counter once per browser session
+    const counted = sessionStorage.getItem('pf_visited');
+    const method = counted ? 'GET' : 'POST';
+    fetch('/api/visitor', { method })
+      .then(r => r.json())
+      .then(data => {
+        if (typeof data?.count === 'number') {
+          setVisitorCount(data.count);
+          sessionStorage.setItem('pf_visited', '1');
+        }
+      })
+      .catch(() => {});
   }, [applyTheme]);
 
   const setMode = (m: VisitorMode) => {
@@ -64,8 +86,11 @@ export function VisitorModeProvider({ children }: { children: React.ReactNode })
   };
 
   return (
-    <VisitorCtx.Provider value={{ mode, setMode, dark, setDark, toggleDark }}>
+    <VisitorCtx.Provider
+      value={{ mode, setMode, dark, setDark, toggleDark, aiOpen, setAiOpen, visitorCount }}
+    >
       {children}
+      {aiOpen && <AIAssistant onClose={() => setAiOpen(false)} mode={mode} />}
     </VisitorCtx.Provider>
   );
 }

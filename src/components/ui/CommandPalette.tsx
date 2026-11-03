@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useVisitorMode } from '@/components/ui/VisitorModeProvider';
 
 const ACTIONS = [
+  { id: 'ai',        label: 'Ask RJ.AI Assistant (Groq + Gemini)',     hint: 'AI CHAT',  type: 'action'   },
   { id: 'game',      label: 'Launch 3D Cyber-Defense Lab (Game Mode)', hint: '3D PLAY',  type: 'mode'     },
   { id: 'developer', label: 'Switch to Developer Mode',                hint: 'MODE',     type: 'mode'     },
   { id: 'recruiter', label: 'Switch to Recruiter Mode',                hint: 'MODE',     type: 'mode'     },
@@ -36,7 +37,7 @@ export function CommandPalette() {
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router   = useRouter();
-  const { setMode } = useVisitorMode();
+  const { setMode, setAiOpen } = useVisitorMode();
 
   const filtered = ACTIONS.filter(a => a.label.toLowerCase().includes(query.toLowerCase()));
 
@@ -62,6 +63,10 @@ export function CommandPalette() {
 
   const execute = (a: (typeof ACTIONS)[0]) => {
     setOpen(false);
+    if (a.id === 'ai') {
+      setAiOpen(true);
+      return;
+    }
     if (a.id === 'game' || a.id === 'developer' || a.id === 'recruiter' || a.id === 'friend') {
       setMode(a.id);
       router.push('/');
@@ -108,18 +113,22 @@ export function CommandPalette() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[200] bg-black/75 backdrop-blur-sm flex items-start justify-center pt-[16vh] px-4"
+          className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-[16vh] px-4"
           onClick={e => e.target === e.currentTarget && setOpen(false)}
         >
           <motion.div
             initial={{ scale: 0.96, y: -8 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.96 }}
-            className="w-full max-w-lg overflow-hidden rounded-xl border border-[#1a1a2e] bg-[#111118]"
-            style={{ boxShadow: '0 0 0 1px rgba(0,255,136,.2), 0 30px 60px rgba(0,0,0,.85)' }}
+            className="w-full max-w-lg overflow-hidden rounded-xl border shadow-2xl"
+            style={{
+              background: 'var(--c-panel)',
+              borderColor: 'var(--c-border)',
+              color: 'var(--c-text)',
+            }}
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1a1a2e]">
-              <span className="text-[#00ff88] font-mono">⌘K</span>
+            <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--c-border)' }}>
+              <span className="font-mono font-bold" style={{ color: 'var(--c-accent)' }}>⌘K</span>
               <input
                 ref={inputRef}
                 value={query}
@@ -129,26 +138,34 @@ export function CommandPalette() {
                 }}
                 onKeyDown={onKey}
                 placeholder="Type a command or jump to any mode..."
-                className="flex-1 bg-transparent text-sm text-[#e8e8f0] outline-none placeholder:text-[#4a4a6a] font-mono"
+                className="flex-1 bg-transparent text-sm outline-none font-mono"
+                style={{ color: 'var(--c-text)' }}
               />
-              <kbd className="text-[10px] px-1.5 py-0.5 border border-[#1a1a2e] rounded text-[#8888aa]">
+              <kbd
+                className="text-[10px] px-1.5 py-0.5 border rounded"
+                style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}
+              >
                 ESC
               </kbd>
             </div>
             <div className="max-h-72 overflow-y-auto py-1">
               {filtered.length === 0 && (
-                <p className="text-center text-[#8888aa] text-xs py-6 font-mono">No matching commands.</p>
+                <p className="text-center text-xs py-6 font-mono" style={{ color: 'var(--c-muted)' }}>
+                  No matching commands.
+                </p>
               )}
               {filtered.map((a, i) => (
                 <button
                   key={a.id}
                   onClick={() => execute(a)}
                   onMouseEnter={() => setActive(i)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-mono transition-colors ${
-                    i === active ? 'bg-[#0d0d12]' : ''
-                  }`}
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-mono transition-colors"
+                  style={{
+                    background: i === active ? 'var(--c-surface)' : 'transparent',
+                    color: i === active ? 'var(--c-text)' : 'var(--c-muted)',
+                  }}
                 >
-                  <span className={i === active ? 'text-[#e8e8f0]' : 'text-[#8888aa]'}>{a.label}</span>
+                  <span>{a.label}</span>
                   <span
                     className="text-[10px] px-2 py-0.5 rounded border"
                     style={{
@@ -162,7 +179,10 @@ export function CommandPalette() {
                 </button>
               ))}
             </div>
-            <div className="px-4 py-2 border-t border-[#1a1a2e] text-[10px] text-[#4a4a6a] font-mono flex gap-4">
+            <div
+              className="px-4 py-2 border-t text-[10px] font-mono flex gap-4"
+              style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}
+            >
               <span>↑↓ navigate</span>
               <span>↵ execute</span>
               <span>ESC close</span>

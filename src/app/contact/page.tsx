@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { NavBar } from '@/components/layout/NavBar';
+import { useVisitorMode } from '@/components/ui/VisitorModeProvider';
 
 const SOCIALS = [
   {
@@ -22,17 +23,12 @@ const SOCIALS = [
     tag: 'in/rafsan-jani72',
     icon: '◉',
   },
-  {
-    label: 'Direct Phone / WhatsApp',
-    href: 'tel:+8801776132121',
-    tag: '+880 1776-132121',
-    icon: '☎',
-  },
 ];
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export default function ContactPage() {
+  const { mode, setAiOpen } = useVisitorMode();
   const [form, setForm]     = useState({ name: '', email: '', message: '', hp: '' });
   const [status, setStatus] = useState<Status>('idle');
 
@@ -65,23 +61,30 @@ export default function ContactPage() {
     color: 'var(--c-text)',
   };
 
+  const headerKicker =
+    mode === 'recruiter'
+      ? 'DIRECT INQUIRY & COLLABORATION'
+      : mode === 'friend'
+      ? 'DROP A NOTE 👋'
+      : '// TRANSMISSION';
+
   return (
     <div className="theme-page">
       <NavBar />
       <main className="max-w-2xl mx-auto px-4 pt-24 pb-16">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
           <p className="text-xs tracking-widest mb-2 font-mono" style={{ color: 'var(--c-accent)' }}>
-            // TRANSMISSION
+            {headerKicker}
           </p>
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--c-text)' }}>
             Get in Touch
           </h1>
           <p className="mb-8 text-sm leading-relaxed" style={{ color: 'var(--c-muted)' }}>
-            Open for software engineering roles, AI automation consulting, research collaborations, or a conversation in Sylhet. All transmissions reach me directly.
+            Open for software engineering roles, AI automation projects, research collaborations, or a conversation in Sylhet. All messages reach my inbox directly.
           </p>
 
-          {/* Social links */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+          {/* 3 Social Links (No Phone Number) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
             {SOCIALS.map(s => (
               <a
                 key={s.label}
@@ -111,7 +114,7 @@ export default function ContactPage() {
             ))}
           </div>
 
-          {/* Form */}
+          {/* Contact Form */}
           {status === 'sent' ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -185,7 +188,7 @@ export default function ContactPage() {
                 className="btn-neon w-full"
                 style={{ opacity: status === 'sending' ? 0.4 : 1 }}
               >
-                <span>{status === 'sending' ? 'Transmitting...' : 'Send Transmission →'}</span>
+                <span>{status === 'sending' ? 'Transmitting...' : 'Send Message →'}</span>
               </button>
 
               {status === 'error' && (
@@ -199,29 +202,37 @@ export default function ContactPage() {
             </form>
           )}
 
-          {/* Resume Download Card */}
-          <div className="panel p-4 mt-6 flex items-center justify-between gap-4">
+          {/* Resume Download + AI Quick Card */}
+          <div className="panel p-4 mt-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="font-mono text-lg" style={{ color: 'var(--c-accent)' }}>
                 ◎
               </span>
               <div>
                 <p className="text-xs font-bold" style={{ color: 'var(--c-text)' }}>
-                  Looking for my 1-page technical resume?
+                  Need my 1-page technical resume or quick answers?
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--c-muted)' }}>
                   Includes SUST CSE, Waffle Up, Tworon, Kairyn v5.1, S_Track &amp; AgriBase
                 </p>
               </div>
             </div>
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noreferrer"
-              className="btn-neon text-xs py-2 px-4 flex-shrink-0"
-            >
-              <span>Download PDF →</span>
-            </a>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAiOpen(true)}
+                className="btn-neon text-xs py-2 px-3"
+              >
+                <span>✦ Ask RJ.AI</span>
+              </button>
+              <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-neon text-xs py-2 px-4"
+              >
+                <span>Resume PDF →</span>
+              </a>
+            </div>
           </div>
         </motion.div>
       </main>
