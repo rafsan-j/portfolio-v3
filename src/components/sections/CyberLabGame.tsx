@@ -899,6 +899,8 @@ function BattlestationScene({
 
 export default function CyberLabGame({ onOpenAI }: { onOpenAI?: () => void }) {
   const { setMode, setAiOpen } = useVisitorMode();
+  const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
+  const [contextLost, setContextLost] = useState(false);
   const [activeStation, setActiveStation] = useState<StationId>('overview');
   const [overclock, setOverclock] = useState(false);
   const [selectedPart, setSelectedPart] = useState<string>('gpu');
@@ -914,6 +916,20 @@ export default function CyberLabGame({ onOpenAI }: { onOpenAI?: () => void }) {
   );
   const [scopeFreq, setScopeFreq] = useState<number>(2.0);
   const [hideHud, setHideHud] = useState(false);
+
+  useEffect(() => {
+    try {
+      const probe = document.createElement('canvas');
+      const context =
+        probe.getContext('webgl2', { powerPreference: 'high-performance' }) ||
+        probe.getContext('webgl', { powerPreference: 'high-performance' });
+      setWebglAvailable(Boolean(context));
+      const loseContext = context?.getExtension('WEBGL_lose_context');
+      loseContext?.loseContext();
+    } catch {
+      setWebglAvailable(false);
+    }
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -961,21 +977,60 @@ export default function CyberLabGame({ onOpenAI }: { onOpenAI?: () => void }) {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#04070f] text-slate-100 select-none font-mono">
-      <Canvas
-        dpr={[1, 2]}
-        camera={{ position: [0, 2.55, 4.35], fov: 46 }}
-        onPointerMissed={() => setActiveStation('overview')}
-      >
-        <BattlestationScene
-          activeStation={activeStation}
-          setActiveStation={setActiveStation}
-          overclock={overclock}
-          selectedPart={selectedPart}
-          solvedCount={solvedIds.length}
-          scopeFreq={scopeFreq}
-          hideHud={hideHud}
-        />
-      </Canvas>
+      <div className="pointer-events-none absolute inset-0 z-[1] opacity-40 bg-[linear-gradient(rgba(0,212,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.04)_1px,transparent_1px)] bg-[size:56px_56px]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_center,transparent_25%,rgba(2,6,23,0.72)_100%)]" />
+      {webglAvailable && !contextLost ? (
+        <Canvas
+          dpr={[1, 1.35]}
+          camera={{ position: [0, 2.55, 4.35], fov: 46 }}
+          gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+          onCreated={({ gl }) => {
+            const canvas = gl.domElement;
+            const handleContextLost = (event: Event) => {
+              event.preventDefault();
+              setContextLost(true);
+            };
+            canvas.addEventListener('webglcontextlost', handleContextLost, false);
+            return () => canvas.removeEventListener('webglcontextlost', handleContextLost);
+          }}
+          onPointerMissed={() => setActiveStation('overview')}
+        >
+          <BattlestationScene
+            activeStation={activeStation}
+            setActiveStation={setActiveStation}
+            overclock={overclock}
+            selectedPart={selectedPart}
+            solvedCount={solvedIds.length}
+            scopeFreq={scopeFreq}
+            hideHud={hideHud}
+          />
+        </Canvas>
+      ) : (
+        <div className="relative z-10 flex h-full items-center justify-center px-6">
+          <div className="max-w-lg rounded-2xl border border-amber-400/40 bg-[#070c18]/95 p-6 text-center shadow-2xl shadow-cyan-950/30 backdrop-blur-xl">
+            <div className="mb-3 text-xs font-bold tracking-[0.3em] text-amber-300">
+              {webglAvailable === null ? 'CHECKING GPU LINK' : 'SAFE MODE // 2D CONSOLE'}
+            </div>
+            <h1 className="mb-3 text-2xl font-bold text-white">3D renderer unavailable</h1>
+            <p className="mb-5 text-sm leading-relaxed text-slate-300">
+              This browser or device blocked WebGL, so the interactive console is running in a
+              safe fallback instead of crashing the page. Enable hardware acceleration or try a
+              modern browser to access the full battlestation.
+            </p>
+            <div className="mb-5 grid grid-cols-3 gap-2 text-[10px] uppercase tracking-wider text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-slate-950/80 p-2">CTF Intel</div>
+              <div className="rounded-lg border border-slate-800 bg-slate-950/80 p-2">Project Archive</div>
+              <div className="rounded-lg border border-slate-800 bg-slate-950/80 p-2">Research Logs</div>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-lg bg-emerald-400 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300"
+            >
+              Retry GPU Link
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Top Command Bar */}
       <div className="fixed top-16 left-0 right-0 z-20 px-4 md:px-8 flex flex-wrap items-center justify-between gap-3 pointer-events-none">

@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -152,11 +152,26 @@ function CyberCoreAndParticles() {
 }
 
 export default function WebGLScene() {
+  const [webglAvailable, setWebglAvailable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      const probe = document.createElement('canvas');
+      const context = probe.getContext('webgl2') || probe.getContext('webgl');
+      setWebglAvailable(Boolean(context));
+      context?.getExtension('WEBGL_lose_context')?.loseContext();
+    } catch {
+      setWebglAvailable(false);
+    }
+  }, []);
+
+  if (!webglAvailable) return null;
+
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 60 }}
-      gl={{ antialias: true, alpha: true }}
-      dpr={[1, 1.5]}
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      dpr={[1, 1.25]}
     >
       <CyberCoreAndParticles />
     </Canvas>
