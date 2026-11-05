@@ -948,7 +948,7 @@ function GalleryTab() {
   return (
     <div className="space-y-6">
       <div className="bg-[#111118] border border-[#fb923c]/20 rounded-lg p-6 space-y-4">
-        <p className="font-mono text-xs text-[#fb923c] tracking-widest">// UPLOAD IMAGE</p>
+        <p className="font-mono text-xs text-[#fb923c] tracking-widest">{'// UPLOAD IMAGE'}</p>
         {!pendingFile ? (
           <div
             onClick={() => fileInputRef.current?.click()}
@@ -1095,7 +1095,7 @@ export default function AdminPage() {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#050505' }}>
         <div className="bg-[#111118] border border-[#1a1a2e] rounded-lg p-8 w-full max-w-sm">
           <p className="font-mono text-[#00ff88] text-xs tracking-widest mb-2 text-center">
-            // CONTROL CENTER
+            {'// CONTROL CENTER'}
           </p>
           <p className="text-[#8888aa] text-xs text-center mb-6">Restricted access.</p>
           <input
@@ -1134,7 +1134,7 @@ export default function AdminPage() {
     >
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <p className="text-[#00ff88] text-xs tracking-widest mb-1 font-mono">// CONTROL CENTER</p>
+          <p className="text-[#00ff88] text-xs tracking-widest mb-1 font-mono">{'// CONTROL CENTER'}</p>
           <h1 className="text-2xl text-[#e8e8f0] font-bold font-display">Portfolio Admin</h1>
         </div>
         <div className="flex items-center gap-3">

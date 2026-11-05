@@ -983,7 +983,7 @@ export default function CyberLabGame({ onOpenAI }: { onOpenAI?: () => void }) {
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
           <div>
             <div className="text-xs font-bold tracking-wider uppercase text-emerald-400">
-              {STATIONS[activeStation].code} // {STATIONS[activeStation].title}
+              {STATIONS[activeStation].code} {'//'} {STATIONS[activeStation].title}
             </div>
             <div className="text-[11px] text-slate-400 hidden sm:block">
               {STATIONS[activeStation].subtitle}

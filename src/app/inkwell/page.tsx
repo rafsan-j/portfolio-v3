@@ -23,7 +23,7 @@ export default function InkwellPage() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
           <p className="text-xs tracking-widest font-mono mb-2" style={{ color: 'var(--c-accent)' }}>
-            // THE INKWELL
+            {'// THE INKWELL'}
           </p>
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--c-text)' }}>
             Writing &amp; Engineering Notes

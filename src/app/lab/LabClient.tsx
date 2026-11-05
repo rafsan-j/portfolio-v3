@@ -178,7 +178,7 @@ export function LabClient({ projects }: { projects: Project[] }) {
                 {selected.case_study && (
                   <div className="border-t pt-4" style={{ borderColor: 'var(--c-border)' }}>
                     <p className="text-xs tracking-widest mb-3 font-mono" style={{ color: 'var(--c-accent)' }}>
-                      // ARCHITECTURE &amp; ENGINEERING CASE STUDY
+                      {'// ARCHITECTURE & ENGINEERING CASE STUDY'}
                     </p>
                     <p
                       className="text-xs leading-relaxed whitespace-pre-wrap font-mono p-4 rounded border"

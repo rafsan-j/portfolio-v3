@@ -28,7 +28,7 @@ export default function VisualsPage() {
       <main className="min-h-screen px-4 pt-24 pb-20 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
           <p className="text-xs tracking-widest font-mono mb-2" style={{ color: 'var(--c-accent)' }}>
-            // VISUALS
+            {'// VISUALS'}
           </p>
           <h1 className="font-display text-3xl md:text-5xl font-bold mb-3" style={{ color: 'var(--c-text)' }}>
             Visuals &amp; 3D Schematics

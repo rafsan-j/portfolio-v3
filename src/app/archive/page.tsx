@@ -14,7 +14,7 @@ export default async function ArchivePage() {
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-16">
         <div className="mb-10">
           <p className="text-xs tracking-widest mb-2 font-mono" style={{ color: 'var(--c-accent-2)' }}>
-            // THE ARCHIVE
+            {'// THE ARCHIVE'}
           </p>
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--c-text)' }}>
             Research, Proofs &amp; Blueprints

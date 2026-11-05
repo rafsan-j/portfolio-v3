@@ -425,7 +425,7 @@ export function BDMapClient() {
               className="text-[10px] font-mono tracking-widest uppercase mb-2.5"
               style={{ color: 'var(--c-muted)' }}
             >
-              // COORDINATE PINS ({visible.length})
+              {'// COORDINATE PINS ('}{visible.length}{')'}
             </p>
             <div className="space-y-1.5">
               {visible.map(loc => {

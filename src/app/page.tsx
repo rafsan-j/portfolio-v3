@@ -12,7 +12,7 @@ const CyberLabGame = dynamic(() => import('@/components/sections/CyberLabGame'),
   ssr: false,
   loading: () => (
     <div className="min-h-screen flex items-center justify-center bg-[#03060c] text-[#00d4ff] font-mono text-xs tracking-widest">
-      // INITIALIZING 3D CYBER-DEFENSE SOC...
+      {'// INITIALIZING 3D CYBER-DEFENSE SOC...'}
     </div>
   ),
 });
@@ -646,7 +646,7 @@ function DeveloperPage({
         <section className="mb-16">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs tracking-widest font-mono text-[#8888aa]">
-              // COMMAND MATRIX (3D PERSPECTIVE TILT)
+              {'// COMMAND MATRIX (3D PERSPECTIVE TILT)'}
             </p>
             <span className="text-[11px] font-mono text-[#4a4a6a]">Hover to tilt · Click to explore</span>
           </div>
@@ -690,7 +690,7 @@ function DeveloperPage({
           <div className="flex items-center justify-between mb-5">
             <div>
               <p className="text-xs tracking-widest font-mono text-[#00ff88] mb-1">
-                // FEATURED SYSTEMS
+                {'// FEATURED SYSTEMS'}
               </p>
               <h2 className="font-display text-2xl font-bold text-[#e8e8f0]">
                 Recent Flagship Builds
@@ -752,7 +752,7 @@ function DeveloperPage({
 
         <section className="mb-16">
           <p className="text-xs tracking-widest font-mono text-[#00d4ff] mb-1">
-            // OPERATIONAL LOG
+            {'// OPERATIONAL LOG'}
           </p>
           <h2 className="font-display text-2xl font-bold text-[#e8e8f0] mb-6">
             Experience, SUST CSE &amp; Leadership
