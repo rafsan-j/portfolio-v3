@@ -60,6 +60,37 @@ CONTACT & LINKS:
 FALLBACK RULE:
 If asked something outside this verified profile, respond with: "That is not something I can speak to — please reach out to Rafsan Jani directly at rafsan2972jani@gmail.com."`;
 
+function makeSvgDataUri(svg: string): string {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg.trim())}`;
+}
+
+export function makeProjectBanner(code: string, accent: string, sub: string): string {
+  return makeSvgDataUri(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#070b14"/>
+          <stop offset="100%" stop-color="#0d1526"/>
+        </linearGradient>
+      </defs>
+      <rect width="640" height="220" fill="url(#bg)"/>
+      <g stroke="${accent}" stroke-opacity="0.16" stroke-width="1">
+        <line x1="0" y1="55" x2="640" y2="55"/>
+        <line x1="0" y1="110" x2="640" y2="110"/>
+        <line x1="0" y1="165" x2="640" y2="165"/>
+        <line x1="160" y1="0" x2="160" y2="220"/>
+        <line x1="320" y1="0" x2="320" y2="220"/>
+        <line x1="480" y1="0" x2="480" y2="220"/>
+      </g>
+      <circle cx="520" cy="110" r="68" fill="none" stroke="${accent}" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <circle cx="520" cy="110" r="42" fill="${accent}" fill-opacity="0.08" stroke="${accent}" stroke-opacity="0.6" stroke-width="1.5"/>
+      <text x="32" y="88" fill="${accent}" font-family="monospace" font-size="22" font-weight="bold" letter-spacing="3">${code}</text>
+      <text x="32" y="126" fill="#e8e8f0" font-family="monospace" font-size="14" letter-spacing="1">${sub}</text>
+      <rect x="32" y="152" width="84" height="3" fill="${accent}" fill-opacity="0.8"/>
+    </svg>
+  `);
+}
+
 export const FALLBACK_PROJECTS: Project[] = [
   {
     id: 'proj-kairyn-v5',
