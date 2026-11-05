@@ -205,8 +205,6 @@ const CTF_TASKS: CtfTask[] = [
   },
 ]
 
-// ─── Procedural High-DPI Canvas Textures for 3D Screens ───────────────
-
 function useUltrawideScreenTexture(overclock: boolean, solvedCount: number) {
   return useMemo(() => {
     if (typeof document === 'undefined') return null
@@ -340,15 +338,15 @@ function useVerticalIdeTexture() {
       '// FEATURED PORTFOLIO REPOS:',
       '01. Kairyn v5.1 (Android Habit & 3D OS)',
       '02. S_Track (SUST CSE Academic OS)',
-      '03. Takonomics (Android Personal Finance)',
-      '04. ParallaxMascot3D (Gyro 5-Plane UI)',
-      '05. AgriBase (Bayesian ML · Bronze)',
-      '06. CERN Beamline Muon Experiment',
-      '07. HAYTHAM X ONE (CSP + AI Energy)',
-      '08. Punorabritti (Transit Bot)',
-      '09. Manim Math + Audio DSP Engine',
-      '10. Clinical Prescription Suite',
-      '11. Project ClearRiver (IoT Sensor)',
+      '03. ParallaxMascot3D (Gyro 5-Plane UI)',
+      '04. AgriBase (Bayesian ML · Bronze)',
+      '05. CERN Beamline Muon Experiment',
+      '06. HAYTHAM X ONE (CSP + AI Energy)',
+      '07. Punorabritti (Transit Bot)',
+      '08. Manim Math + Audio DSP Engine',
+      '09. Clinical Prescription Suite',
+      '10. Project ClearRiver (IoT Sensor)',
+      '11. DCMD Water Purification',
       '',
       '>>> CLICK TO INSPECT ALL PROJECTS <<<',
     ]
@@ -428,17 +426,15 @@ function useOscilloscopeTexture(freq: number) {
   }, [freq])
 }
 
-// ─── Smooth Camera Controller with Mouse Parallax ─────────────────────
-
 function CameraRig({ activeStation }: { activeStation: StationId }) {
-  const { camera, pointer } = useThree()
+  const { camera, mouse } = useThree()
   const currentPos = useRef(new THREE.Vector3(0, 2.55, 4.35))
   const currentLook = useRef(new THREE.Vector3(0, 1.05, -0.4))
 
   useFrame((_, delta) => {
     const cfg = STATIONS[activeStation]
-    const parallaxX = activeStation === 'overview' ? pointer.x * 0.42 : pointer.x * 0.06
-    const parallaxY = activeStation === 'overview' ? pointer.y * 0.22 : pointer.y * 0.04
+    const parallaxX = activeStation === 'overview' ? mouse.x * 0.42 : mouse.x * 0.06
+    const parallaxY = activeStation === 'overview' ? mouse.y * 0.22 : mouse.y * 0.04
 
     const targetPos = new THREE.Vector3(
       cfg.camPos[0] + parallaxX,
@@ -457,8 +453,6 @@ function CameraRig({ activeStation }: { activeStation: StationId }) {
 
   return null
 }
-
-// ─── 3D Tempered-Glass Custom PC Tower (with Spinning ARGB Fans) ──────
 
 function CustomPcTower({
   overclock,
@@ -599,8 +593,6 @@ function CustomPcTower({
     </group>
   )
 }
-
-// ─── Full 3D Engineering Battlestation Scene ──────────────────────────
 
 function BattlestationScene({
   activeStation,
@@ -849,8 +841,8 @@ function BattlestationScene({
   )
 }
 
-export default function CyberLabGame() {
-  const { setMode, setShowAI, setShowTerminal } = useVisitorMode()
+export default function CyberLabGame({ onOpenAI }: { onOpenAI?: () => void }) {
+  const { setMode, setAiOpen } = useVisitorMode()
   const [activeStation, setActiveStation] = useState<StationId>('overview')
   const [overclock, setOverclock] = useState(false)
   const [selectedPart, setSelectedPart] = useState<string>('gpu')
@@ -1217,13 +1209,13 @@ export default function CyberLabGame() {
                   ↓ Download Resume PDF
                 </a>
                 <button
-                  onClick={() => setShowAI(true)}
+                  onClick={() => (onOpenAI ? onOpenAI() : setAiOpen(true))}
                   className="px-3 py-2 rounded-xl bg-emerald-400 text-slate-950 font-bold"
                 >
                   ✦ Ask RJ.AI Assistant
                 </button>
                 <button
-                  onClick={() => setShowTerminal(true)}
+                  onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: '`' }))}
                   className="px-3 py-2 rounded-xl bg-slate-800 text-slate-200"
                 >
                   &gt;_ Launch UNIX Terminal
