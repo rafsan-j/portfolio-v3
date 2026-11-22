@@ -150,7 +150,8 @@ function drawPillarLabel(
 }
 
 interface PillarState {
-  column: THREE.Mesh;
+  glassSleeve: THREE.Mesh;
+  brassCore: THREE.Mesh;
   capRing: THREE.Mesh;
   labelSprite: THREE.Sprite;
   labelCtx: CanvasRenderingContext2D | null;
@@ -193,28 +194,34 @@ export function createMessLedgerWorld(): WorldHandle & {
   warmUp.position.set(0, -1.2, 3.2);
   group.add(ambient, keyBrass, rimCool, warmUp);
 
-  // --- Floating Dark-Glass Architectural Base Plinth ---
+  // --- Floating Reflective Smoked-Obsidian-Glass Architectural Base Plinth ---
   const plinthGroup = new THREE.Group();
   plinthGroup.position.set(0, -1.65, 0);
   group.add(plinthGroup);
 
   const gridTex = trackTex(createPlinthGridTexture());
   const glassTopMat = trackMat(
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhysicalMaterial({
       map: gridTex,
-      roughness: 0.16,
-      metalness: 0.55,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.06,
+      roughness: 0.12,
+      metalness: 0.35,
+      envMapIntensity: 1.45,
       transparent: true,
-      opacity: 0.94,
+      opacity: 0.95,
     })
   );
   const darkGlassSideMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#0b1016',
+    new THREE.MeshPhysicalMaterial({
+      color: '#0a0e13',
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
       roughness: 0.12,
-      metalness: 0.72,
+      metalness: 0.35,
+      envMapIntensity: 1.5,
       transparent: true,
-      opacity: 0.88,
+      opacity: 0.9,
     })
   );
 
@@ -229,46 +236,83 @@ export function createMessLedgerWorld(): WorldHandle & {
   ]);
   plinthGroup.add(plinthMesh);
 
-  // Brushed-brass architectural trim bezel around plinth
+  // Specular brushed-brass material for caliper rings & plinth bezel
   const brassTex = trackTex(createBrushedBrassTexture());
-  const brassMat = trackMat(
-    new THREE.MeshStandardMaterial({
+  const caliperBrassMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
       map: brassTex,
-      color: '#d9b56c',
-      roughness: 0.26,
-      metalness: 0.9,
+      color: '#e2bf76',
+      metalness: 0.98,
+      roughness: 0.14,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 1.6,
     })
   );
   const plinthTrim = new THREE.Mesh(
     trackGeo(new THREE.BoxGeometry(6.92, 0.06, 3.52)),
-    brassMat
+    caliperBrassMat
   );
   plinthTrim.position.y = -0.14;
   plinthGroup.add(plinthTrim);
 
-  // --- 4 Vertical Brushed-Brass Precision Pillars ---
+  // --- 4 Optical-Glass Sleeves Encasing Machined Brushed-Brass Inner Cores ---
   const socketMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#161a20',
-      roughness: 0.38,
-      metalness: 0.78,
+    new THREE.MeshPhysicalMaterial({
+      color: '#171c22',
+      roughness: 0.24,
+      metalness: 0.88,
+      clearcoat: 0.4,
+      clearcoatRoughness: 0.16,
+      envMapIntensity: 1.3,
+    })
+  );
+  const glassSleeveMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#eef5f8',
+      transmission: 0.86,
+      ior: 1.48,
+      thickness: 0.8,
+      roughness: 0.05,
+      metalness: 0.0,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.4,
+      attenuationColor: new THREE.Color('#c8dce6'),
+      attenuationDistance: 3.2,
+      transparent: true,
+    })
+  );
+  const brassCoreMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      map: brassTex,
+      color: '#e0bc72',
+      metalness: 0.96,
+      roughness: 0.15,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.15,
+      envMapIntensity: 1.6,
     })
   );
   const capGlowMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#f7dfa8',
-      emissive: '#d69d42',
-      emissiveIntensity: 1.5,
-      roughness: 0.2,
-      metalness: 0.6,
+    new THREE.MeshPhysicalMaterial({
+      color: '#ffe8b8',
+      emissive: '#e8a845',
+      emissiveIntensity: 1.85,
+      roughness: 0.14,
+      metalness: 0.85,
+      clearcoat: 0.5,
+      envMapIntensity: 1.4,
     })
   );
 
-  // Unit-height cylinder (height = 1, shifted so base sits at y = 0)
-  const unitPillarGeo = trackGeo(new THREE.CylinderGeometry(0.32, 0.35, 1.0, 24));
-  unitPillarGeo.translate(0, 0.5, 0);
-  const socketGeo = trackGeo(new THREE.CylinderGeometry(0.42, 0.46, 0.12, 24));
-  const capRingGeo = trackGeo(new THREE.TorusGeometry(0.33, 0.025, 12, 32));
+  // Unit-height cylinders (base sits at y = 0)
+  const unitSleeveGeo = trackGeo(new THREE.CylinderGeometry(0.34, 0.36, 1.0, 32));
+  unitSleeveGeo.translate(0, 0.5, 0);
+  const unitCoreGeo = trackGeo(new THREE.CylinderGeometry(0.21, 0.23, 0.96, 32));
+  unitCoreGeo.translate(0, 0.48, 0);
+  const socketGeo = trackGeo(new THREE.CylinderGeometry(0.42, 0.46, 0.12, 28));
+  const capRingGeo = trackGeo(new THREE.TorusGeometry(0.35, 0.026, 16, 40));
   capRingGeo.rotateX(Math.PI / 2);
 
   const pillars: PillarState[] = [];
@@ -279,9 +323,13 @@ export function createMessLedgerWorld(): WorldHandle & {
     socket.position.set(member.x, baseY + 0.05, member.z);
     plinthGroup.add(socket);
 
-    const column = new THREE.Mesh(unitPillarGeo, brassMat);
-    column.position.set(member.x, baseY + 0.1, member.z);
-    plinthGroup.add(column);
+    const brassCore = new THREE.Mesh(unitCoreGeo, brassCoreMat);
+    brassCore.position.set(member.x, baseY + 0.1, member.z);
+    plinthGroup.add(brassCore);
+
+    const glassSleeve = new THREE.Mesh(unitSleeveGeo, glassSleeveMat);
+    glassSleeve.position.set(member.x, baseY + 0.1, member.z);
+    plinthGroup.add(glassSleeve);
 
     const capRing = new THREE.Mesh(capRingGeo, capGlowMat);
     capRing.position.set(member.x, baseY + 0.1 + 1.0, member.z);
@@ -307,7 +355,8 @@ export function createMessLedgerWorld(): WorldHandle & {
     plinthGroup.add(labelSprite);
 
     pillars.push({
-      column,
+      glassSleeve,
+      brassCore,
       capRing,
       labelSprite,
       labelCtx,
@@ -317,7 +366,7 @@ export function createMessLedgerWorld(): WorldHandle & {
     });
   }
 
-  // --- Two Slowly Counter-Rotating Precision Brass Caliper Rings ---
+  // --- Two Slowly Counter-Rotating Specular Brushed-Brass Caliper Rings ---
   const caliperGroup = new THREE.Group();
   caliperGroup.position.set(0, 0.15, 0);
   group.add(caliperGroup);
@@ -327,8 +376,8 @@ export function createMessLedgerWorld(): WorldHandle & {
   caliperGroup.add(outerRingGroup);
 
   const outerTorus = new THREE.Mesh(
-    trackGeo(new THREE.TorusGeometry(4.35, 0.036, 16, 120)),
-    brassMat
+    trackGeo(new THREE.TorusGeometry(4.35, 0.036, 20, 128)),
+    caliperBrassMat
   );
   outerRingGroup.add(outerTorus);
 
@@ -336,7 +385,7 @@ export function createMessLedgerWorld(): WorldHandle & {
   const tickGeo = trackGeo(new THREE.BoxGeometry(0.025, 0.14, 0.025));
   for (let i = 0; i < 36; i++) {
     const angle = (i / 36) * Math.PI * 2;
-    const tick = new THREE.Mesh(tickGeo, brassMat);
+    const tick = new THREE.Mesh(tickGeo, caliperBrassMat);
     tick.position.set(Math.cos(angle) * 4.24, Math.sin(angle) * 4.24, 0);
     tick.rotation.z = angle + Math.PI / 2;
     outerRingGroup.add(tick);
@@ -347,8 +396,8 @@ export function createMessLedgerWorld(): WorldHandle & {
   caliperGroup.add(innerRingGroup);
 
   const innerTorus = new THREE.Mesh(
-    trackGeo(new THREE.TorusGeometry(3.85, 0.026, 16, 108)),
-    brassMat
+    trackGeo(new THREE.TorusGeometry(3.85, 0.026, 20, 112)),
+    caliperBrassMat
   );
   innerRingGroup.add(innerTorus);
 
@@ -375,7 +424,8 @@ export function createMessLedgerWorld(): WorldHandle & {
   applyPoolBdt(18500);
   for (const p of pillars) {
     p.currentHeight = p.targetHeight;
-    p.column.scale.y = p.currentHeight;
+    p.glassSleeve.scale.y = p.currentHeight;
+    p.brassCore.scale.y = p.currentHeight;
     p.capRing.position.y = 0.23 + p.currentHeight;
     p.labelSprite.position.y = 0.23 + p.currentHeight + 0.45;
   }
@@ -389,10 +439,11 @@ export function createMessLedgerWorld(): WorldHandle & {
       const clampedDt = Math.min(dt, 0.1);
       const alpha = 1 - Math.exp(-clampedDt * 4.5);
 
-      // Smoothly animate pillar heights
+      // Smoothly animate optical-glass sleeves & inner brass core heights
       for (const p of pillars) {
         p.currentHeight = THREE.MathUtils.lerp(p.currentHeight, p.targetHeight, alpha);
-        p.column.scale.y = p.currentHeight;
+        p.glassSleeve.scale.y = p.currentHeight;
+        p.brassCore.scale.y = p.currentHeight;
         p.capRing.position.y = 0.23 + p.currentHeight;
         p.labelSprite.position.y = 0.23 + p.currentHeight + 0.45;
       }

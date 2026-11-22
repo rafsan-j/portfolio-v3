@@ -93,40 +93,43 @@ const TERRAIN_FRAG = /* glsl */ `
   varying vec3 vWorldPos;
 
   void main() {
-    vec3 lowCol = vec3(0.045, 0.11, 0.11);
-    vec3 midCol = vec3(0.085, 0.19, 0.175);
-    vec3 highCol = vec3(0.17, 0.29, 0.25);
+    vec3 lowCol = vec3(0.038, 0.095, 0.098);
+    vec3 midCol = vec3(0.075, 0.172, 0.158);
+    vec3 highCol = vec3(0.155, 0.265, 0.228);
 
     float hNorm = clamp((vElev + 0.85) / 2.6, 0.0, 1.0);
     vec3 baseCol = mix(lowCol, midCol, smoothstep(0.0, 0.55, hNorm));
     baseCol = mix(baseCol, highCol, smoothstep(0.55, 1.0, hNorm));
 
-    // Directional hillshade
+    // Directional hillshade with crisp ridge definition
+    vec3 n = normalize(vNormalWorld);
     vec3 lightDir = normalize(vec3(0.55, 0.85, 0.45));
-    float diff = 0.45 + 0.55 * max(dot(normalize(vNormalWorld), lightDir), 0.0);
+    float diff = 0.42 + 0.58 * max(dot(n, lightDir), 0.0);
     baseCol *= diff;
 
     // Anti-aliased topographic contour lines
     float interval = 0.22;
     float scaled = vElev / interval;
     float distToLine = abs(fract(scaled - 0.5) - 0.5) / max(fwidth(scaled), 0.0001);
-    float minorLine = 1.0 - smoothstep(0.65, 1.45, distToLine);
+    float minorLine = 1.0 - smoothstep(0.6, 1.35, distToLine);
 
     float majorScaled = vElev / (interval * 4.0);
     float distToMajor = abs(fract(majorScaled - 0.5) - 0.5) / max(fwidth(majorScaled), 0.0001);
-    float majorLine = 1.0 - smoothstep(0.7, 1.6, distToMajor);
+    float majorLine = 1.0 - smoothstep(0.65, 1.5, distToMajor);
 
-    vec3 contourColor = vec3(0.32, 0.62, 0.54);
+    vec3 contourColor = vec3(0.28, 0.56, 0.49);
     baseCol = mix(baseCol, contourColor, minorLine * 0.28);
-    baseCol = mix(baseCol, vec3(0.75, 0.66, 0.45), majorLine * 0.36);
+    baseCol = mix(baseCol, vec3(0.68, 0.59, 0.38), majorLine * 0.36);
 
     // Wet shoreline darkening & subtle foam band near water level
     float shoreDist = vElev - uWaterLevel;
     float wetBand = smoothstep(0.28, 0.0, abs(shoreDist));
-    baseCol *= 1.0 - 0.26 * wetBand;
-    float foamLine = smoothstep(0.06, 0.0, abs(shoreDist));
-    baseCol += vec3(0.38, 0.68, 0.66) * foamLine * 0.35;
+    baseCol *= 1.0 - 0.28 * wetBand;
+    float foamLine = smoothstep(0.055, 0.0, abs(shoreDist));
+    baseCol += vec3(0.32, 0.58, 0.56) * foamLine * 0.32;
 
+    // Keep terrain cleanly below bloom threshold (0.82)
+    baseCol = min(baseCol, vec3(0.72));
     gl_FragColor = vec4(baseCol, 1.0);
   }
 `;
@@ -145,7 +148,8 @@ const WATER_VERT = /* glsl */ `
     float t = uTime * uWaveSpeed;
     float w1 = sin(pos.x * 1.15 + t * 1.35) * cos(pos.z * 0.95 + t * 0.9);
     float w2 = sin(pos.x * 2.3 - pos.z * 1.85 + t * 2.1) * 0.45;
-    float disp = (w1 + w2) * uWaveAmp;
+    float w3 = cos(pos.x * 3.7 + pos.z * 3.1 - t * 2.8) * 0.16;
+    float disp = (w1 + w2 + w3) * uWaveAmp;
     pos.y += disp;
     vRipple = disp;
     vec4 wp = modelMatrix * vec4(pos, 1.0);
@@ -165,26 +169,42 @@ const WATER_FRAG = /* glsl */ `
 
   void main() {
     vec3 viewDir = normalize(cameraPosition - vWorldPos);
-    vec3 n = normalize(vec3(
-      cos(vWorldPos.x * 1.8 + uTime * uWaveSpeed) * 0.14,
-      1.0,
-      sin(vWorldPos.z * 1.8 + uTime * uWaveSpeed * 0.9) * 0.14
-    ));
+    float t = uTime * uWaveSpeed;
 
-    float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
-    vec3 lightDir = normalize(vec3(0.4, 0.85, 0.35));
-    vec3 halfVec = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(n, halfVec), 0.0), 42.0);
+    // Multi-octave micro-ripple normal for crisp Fresnel-specular reflections
+    float nx =
+      cos(vWorldPos.x * 1.9 + t * 1.2) * 0.11 +
+      cos(vWorldPos.x * 4.4 - vWorldPos.z * 3.2 + t * 2.3) * 0.055;
+    float nz =
+      sin(vWorldPos.z * 1.8 + t * 1.0) * 0.11 +
+      sin(vWorldPos.z * 4.1 + vWorldPos.x * 2.9 - t * 2.0) * 0.055;
+    vec3 n = normalize(vec3(nx, 1.0, nz));
 
-    vec3 col = uWaterTint;
-    col += vec3(0.28, 0.62, 0.64) * fresnel * 0.65;
-    col += vec3(0.95, 0.84, 0.62) * spec * (0.55 + uWarningIntensity * 0.35);
-    col += vec3(0.85, 0.55, 0.22) * smoothstep(0.6, 1.3, uWarningIntensity) * fresnel * 0.35;
-    col += vec3(0.18, 0.36, 0.38) * clamp(vRipple * 3.5, 0.0, 1.0) * 0.25;
+    // Schlick Fresnel reflection against dark monsoon sky gradient
+    float ndotv = clamp(dot(n, viewDir), 0.0, 1.0);
+    float fresnel = 0.04 + 0.96 * pow(1.0 - ndotv, 4.2);
+
+    vec3 reflDir = reflect(-viewDir, n);
+    float skyGrad = clamp(reflDir.y * 0.5 + 0.5, 0.0, 1.0);
+    vec3 monsoonZenith = vec3(0.03, 0.07, 0.10);
+    vec3 monsoonHorizon = vec3(0.16, 0.34, 0.38);
+    vec3 skyReflect = mix(monsoonHorizon, monsoonZenith, smoothstep(0.08, 0.72, skyGrad));
+
+    // Dual-lobe crisp specular highlights (moonlight + amber warning bounce)
+    vec3 keyLightDir = normalize(vec3(0.42, 0.86, 0.34));
+    vec3 halfKey = normalize(keyLightDir + viewDir);
+    float specSharp = pow(max(dot(n, halfKey), 0.0), 160.0);
+    float specBroad = pow(max(dot(n, halfKey), 0.0), 34.0);
+
+    vec3 col = mix(uWaterTint * 0.78, skyReflect, fresnel * 0.85);
+    col += vec3(0.76, 0.92, 0.95) * specSharp * 0.95;
+    col += vec3(0.32, 0.58, 0.60) * specBroad * 0.32;
+    col += vec3(0.92, 0.62, 0.26) * smoothstep(0.45, 1.35, uWarningIntensity) * fresnel * 0.42;
+    col += vec3(0.16, 0.34, 0.38) * clamp(vRipple * 3.8, 0.0, 1.0) * 0.24;
 
     float edgeFade = smoothstep(0.0, 0.04, vUv.x) * smoothstep(1.0, 0.96, vUv.x)
                    * smoothstep(0.0, 0.04, vUv.y) * smoothstep(1.0, 0.96, vUv.y);
-    gl_FragColor = vec4(col, (0.62 + fresnel * 0.22) * edgeFade);
+    gl_FragColor = vec4(col, (0.66 + fresnel * 0.26) * edgeFade);
   }
 `;
 
@@ -206,12 +226,18 @@ const ARC_FRAG = /* glsl */ `
   void main() {
     float head = fract(uTime * uPulseSpeed * 0.35 + uPhaseOffset);
     float dist = fract(head - vUv.x);
-    float pulse = smoothstep(0.28, 0.0, dist);
-    float baseLine = 0.24;
-    vec3 amber = vec3(1.0, 0.70, 0.28);
-    vec3 hotCore = vec3(1.0, 0.92, 0.70);
-    vec3 col = mix(amber, hotCore, pulse);
-    float alpha = clamp(baseLine + pulse * (0.76 + uWarningIntensity * 0.2), 0.0, 1.0);
+    float pulse = smoothstep(0.26, 0.0, dist);
+    float coreTip = smoothstep(0.09, 0.0, dist);
+
+    // Base filament stays subtle below bloom threshold; pulse core drives HDR bloom (> 1.4)
+    vec3 baseAmber = vec3(0.62, 0.42, 0.16);
+    vec3 hdrPulse = vec3(1.0, 0.82, 0.42) * (1.65 + uWarningIntensity * 0.55);
+    vec3 hdrCore = vec3(1.0, 0.95, 0.78) * (2.25 + uWarningIntensity * 0.65);
+
+    vec3 col = mix(baseAmber, hdrPulse, pulse);
+    col = mix(col, hdrCore, coreTip);
+
+    float alpha = clamp(0.22 + pulse * (0.78 + uWarningIntensity * 0.18), 0.0, 1.0);
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -234,11 +260,13 @@ const WARNING_RING_FRAG = /* glsl */ `
     vec2 p = vUv * 2.0 - 1.0;
     float r = length(p);
     float cycle = fract(uTime * (0.45 + uWarningIntensity * 0.55) + uOffset);
-    float ring = smoothstep(0.09, 0.0, abs(r - cycle)) * (1.0 - cycle);
-    float staticRing = smoothstep(0.05, 0.0, abs(r - 0.32)) * 0.45;
-    float alpha = (ring * (0.4 + uWarningIntensity * 0.65) + staticRing) * step(r, 1.0);
-    vec3 col = mix(vec3(0.95, 0.68, 0.26), vec3(1.0, 0.44, 0.16), smoothstep(0.5, 1.3, uWarningIntensity));
-    gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.95));
+    float ring = smoothstep(0.085, 0.0, abs(r - cycle)) * (1.0 - cycle);
+    float staticRing = smoothstep(0.045, 0.0, abs(r - 0.32)) * 0.42;
+    float alpha = (ring * (0.42 + uWarningIntensity * 0.6) + staticRing) * step(r, 1.0);
+
+    vec3 baseCol = mix(vec3(0.95, 0.68, 0.26), vec3(1.0, 0.44, 0.16), smoothstep(0.5, 1.3, uWarningIntensity));
+    float hdrGain = 1.0 + ring * (0.55 + uWarningIntensity * 0.45);
+    gl_FragColor = vec4(baseCol * hdrGain, clamp(alpha, 0.0, 0.95));
   }
 `;
 
@@ -303,8 +331,8 @@ export function createUjaanTerrainWorld(): WorldHandle & {
   amberFill.position.set(0, 2.5, 0);
   group.add(ambient, dirLight, amberFill);
 
-  // --- Sculpted Haor Basin Terrain ---
-  const terrainGeo = trackGeo(new THREE.PlaneGeometry(14, 14, 84, 84));
+  // --- High-Resolution 112x112 Sculpted Haor Basin Terrain ---
+  const terrainGeo = trackGeo(new THREE.PlaneGeometry(14, 14, 112, 112));
   terrainGeo.rotateX(-Math.PI / 2);
   const posAttr = terrainGeo.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < posAttr.count; i++) {
@@ -327,12 +355,15 @@ export function createUjaanTerrainWorld(): WorldHandle & {
   const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
   group.add(terrainMesh);
 
-  // Architectural Diorama Plinth Frame
+  // Architectural Diorama Plinth Frame (Studio PBR)
   const plinthMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#0c1315',
-      roughness: 0.62,
-      metalness: 0.45,
+    new THREE.MeshPhysicalMaterial({
+      color: '#0e1518',
+      roughness: 0.28,
+      metalness: 0.72,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.16,
+      envMapIntensity: 1.25,
     })
   );
   const plinthMesh = new THREE.Mesh(trackGeo(new THREE.BoxGeometry(14.3, 0.7, 14.3)), plinthMat);
@@ -340,7 +371,7 @@ export function createUjaanTerrainWorld(): WorldHandle & {
   group.add(plinthMesh);
 
   // --- Translucent Animated GLSL Floodwater Plane ---
-  const waterGeo = trackGeo(new THREE.PlaneGeometry(13.9, 13.9, 64, 64));
+  const waterGeo = trackGeo(new THREE.PlaneGeometry(13.9, 13.9, 80, 80));
   waterGeo.rotateX(-Math.PI / 2);
   const waterUniforms = {
     uTime: { value: 0 },
@@ -362,25 +393,39 @@ export function createUjaanTerrainWorld(): WorldHandle & {
   waterMesh.position.y = initCfg.waterY;
   group.add(waterMesh);
 
-  // --- 5 Sub-Basin Amber Beacon Pillars & Warning Rings ---
+  // --- 5 Sub-Basin Amber Beacon Pillars, Bloom-Calibrated Tips & Warning Rings ---
   const beaconMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#d99a3e',
+      emissive: '#e88924',
+      emissiveIntensity: 1.15,
+      roughness: 0.22,
+      metalness: 0.78,
+      clearcoat: 0.5,
+      envMapIntensity: 1.35,
+    })
+  );
+  const beaconTipMat = trackMat(
     new THREE.MeshStandardMaterial({
-      color: '#ffb94d',
-      emissive: '#f59227',
-      emissiveIntensity: 2.2,
-      roughness: 0.2,
-      metalness: 0.3,
+      color: '#fff1cc',
+      emissive: '#ffaa3b',
+      emissiveIntensity: 2.4,
+      roughness: 0.12,
+      metalness: 0.1,
     })
   );
   const baseRingMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#1b2729',
-      roughness: 0.4,
-      metalness: 0.78,
+    new THREE.MeshPhysicalMaterial({
+      color: '#1b272a',
+      roughness: 0.26,
+      metalness: 0.88,
+      clearcoat: 0.4,
+      envMapIntensity: 1.3,
     })
   );
-  const pillarGeo = trackGeo(new THREE.CylinderGeometry(0.06, 0.11, 1.35, 16));
-  const collarGeo = trackGeo(new THREE.CylinderGeometry(0.24, 0.28, 0.14, 20));
+  const pillarGeo = trackGeo(new THREE.CylinderGeometry(0.055, 0.105, 1.32, 20));
+  const tipGeo = trackGeo(new THREE.SphereGeometry(0.095, 20, 20));
+  const collarGeo = trackGeo(new THREE.CylinderGeometry(0.24, 0.28, 0.14, 24));
   const ringPlaneGeo = trackGeo(new THREE.PlaneGeometry(2.1, 2.1));
   ringPlaneGeo.rotateX(-Math.PI / 2);
 
@@ -402,8 +447,12 @@ export function createUjaanTerrainWorld(): WorldHandle & {
     beaconGroup.add(collar);
 
     const pillar = new THREE.Mesh(pillarGeo, beaconMat);
-    pillar.position.y = 0.72;
+    pillar.position.y = 0.7;
     beaconGroup.add(pillar);
+
+    const tipOrb = new THREE.Mesh(tipGeo, beaconTipMat);
+    tipOrb.position.y = 1.38;
+    beaconGroup.add(tipOrb);
 
     // Pulsing amber warning ring
     const ringUniforms = {
@@ -438,11 +487,11 @@ export function createUjaanTerrainWorld(): WorldHandle & {
       })
     );
     const sprite = new THREE.Sprite(spriteMat);
-    sprite.position.set(0, 1.72, 0);
+    sprite.position.set(0, 1.75, 0);
     sprite.scale.set(1.65, 0.42, 1);
     beaconGroup.add(sprite);
 
-    beaconTips.push(new THREE.Vector3(basin.x, groundY + 1.35, basin.z));
+    beaconTips.push(new THREE.Vector3(basin.x, groundY + 1.38, basin.z));
   });
 
   // --- Animated 3D Dispatch Arcs (TubeGeometry + CatmullRomCurve3) ---
@@ -460,7 +509,7 @@ export function createUjaanTerrainWorld(): WorldHandle & {
     mid.y += 1.65 + (idx % 2) * 0.45;
 
     const curve = new THREE.CatmullRomCurve3([start, mid, end]);
-    const tubeGeo = trackGeo(new THREE.TubeGeometry(curve, 48, 0.036, 8, false));
+    const tubeGeo = trackGeo(new THREE.TubeGeometry(curve, 56, 0.036, 10, false));
     const arcUniforms = {
       uTime: { value: 0 },
       uPulseSpeed: { value: initCfg.pulseSpeed },
@@ -533,9 +582,10 @@ export function createUjaanTerrainWorld(): WorldHandle & {
         u.uWarningIntensity.value = waterUniforms.uWarningIntensity.value;
       }
 
-      // Beacon emissive pulse
+      // Bloom-calibrated beacon tip & shaft pulse
       const pulse = 0.5 + 0.5 * Math.sin(elapsed * (2.0 + waterUniforms.uWarningIntensity.value * 3.0));
-      beaconMat.emissiveIntensity = 1.6 + pulse * (0.9 + waterUniforms.uWarningIntensity.value * 1.4);
+      beaconMat.emissiveIntensity = 0.9 + pulse * (0.45 + waterUniforms.uWarningIntensity.value * 0.55);
+      beaconTipMat.emissiveIntensity = 1.85 + pulse * (1.15 + waterUniforms.uWarningIntensity.value * 1.45);
 
       // Gentle diorama orbit & pointer tilt
       const targetRotY = pointer.x * 0.22 * activeWeight + Math.sin(elapsed * 0.14) * 0.08;

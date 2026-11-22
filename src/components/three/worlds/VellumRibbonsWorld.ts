@@ -56,24 +56,42 @@ const RIBBON_FRAG = /* glsl */ `
     vec3 viewDir = normalize(cameraPosition - vWorldPos);
     vec3 n = normalize(vNormalWorld);
     float ndotv = abs(dot(n, viewDir));
-    float fresnel = pow(1.0 - ndotv, 2.6);
+    float fresnel = pow(1.0 - ndotv, 2.8);
+    float grazingRim = pow(1.0 - ndotv, 4.2);
 
-    // Iridescent silk weave gradient along the ribbon
+    // Iridescent silk weave gradient along the ribbon (kept rich & below bloom threshold)
     float flowMix = 0.5 + 0.5 * sin(vUv.x * 6.2831 - uSimTime * 0.65);
-    vec3 baseCol = mix(uPrimaryColor, uSecondaryColor, flowMix * 0.65);
+    vec3 baseCol = mix(uPrimaryColor, uSecondaryColor, flowMix * 0.65) * 0.68;
 
-    // Fine silk fiber shimmer
+    // Fine silk fiber shimmer + selective bloom-calibrated Fresnel rim (~1.15–1.35 luminance on grazing angles)
     float threads = 0.92 + 0.08 * sin(vUv.y * 95.0);
-    vec3 col = baseCol * threads + uSheenColor * fresnel * 0.85;
+    vec3 col = baseCol * threads + uSheenColor * (fresnel * 0.58 + grazingRim * 0.72);
+    col = min(col, vec3(1.36));
 
     // Soft cathedral edge fade at ribbon ends & borders
     float endFade = smoothstep(0.0, 0.14, vUv.x) * smoothstep(1.0, 0.86, vUv.x);
     float edgeFade = smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.88, vUv.y);
-    float alpha = (0.48 + fresnel * 0.42) * endFade * edgeFade;
+    float alpha = (0.48 + fresnel * 0.44) * endFade * edgeFade;
 
     gl_FragColor = vec4(col, alpha);
   }
 `;
+
+function createRoundedRectShape(w: number, h: number, r: number): THREE.Shape {
+  const s = new THREE.Shape();
+  const hw = w * 0.5;
+  const hh = h * 0.5;
+  s.moveTo(-hw + r, -hh);
+  s.lineTo(hw - r, -hh);
+  s.quadraticCurveTo(hw, -hh, hw, -hh + r);
+  s.lineTo(hw, hh - r);
+  s.quadraticCurveTo(hw, hh, hw - r, hh);
+  s.lineTo(-hw + r, hh);
+  s.quadraticCurveTo(-hw, hh, -hw, hh - r);
+  s.lineTo(-hw, -hh + r);
+  s.quadraticCurveTo(-hw, -hh, -hw + r, -hh);
+  return s;
+}
 
 function createMonolithEtchingTexture(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
@@ -314,48 +332,92 @@ export function createVellumRibbonsWorld(): WorldHandle & {
     group.add(mesh);
   }
 
-  // --- Central Floating Obsidian Monolith Slab ---
+  // --- Central Floating Beveled Obsidian-and-Brushed-Brass Architectural Stele ---
   const monolithGroup = new THREE.Group();
   monolithGroup.position.set(0, 0, 0.35);
   group.add(monolithGroup);
 
-  const monolithSideMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#101214',
-      roughness: 0.34,
-      metalness: 0.58,
+  const obsidianSteleMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#0e1013',
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.06,
+      metalness: 0.25,
+      roughness: 0.18,
+      envMapIntensity: 1.45,
     })
   );
   const etchingTex = trackTex(createMonolithEtchingTexture());
   const monolithFrontMat = trackMat(
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhysicalMaterial({
       map: etchingTex,
-      roughness: 0.3,
-      metalness: 0.42,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.06,
+      metalness: 0.25,
+      roughness: 0.18,
+      envMapIntensity: 1.45,
     })
   );
 
-  const slabGeo = trackGeo(new THREE.BoxGeometry(2.15, 3.2, 0.18));
-  const slabMesh = new THREE.Mesh(slabGeo, [
-    monolithSideMat,
-    monolithSideMat,
-    monolithSideMat,
-    monolithSideMat,
-    monolithFrontMat,
-    monolithSideMat,
-  ]);
-  monolithGroup.add(slabMesh);
-
-  // Subtle gold trim frame around monolith edges
-  const edgeGeo = trackGeo(new THREE.EdgesGeometry(slabGeo));
-  const edgeMat = trackMat(
-    new THREE.LineBasicMaterial({
-      color: '#E8DFC9',
-      transparent: true,
-      opacity: 0.42,
+  // Beveled architectural obsidian stele body
+  const steleShape = createRoundedRectShape(2.1, 3.16, 0.06);
+  const steleGeo = trackGeo(
+    new THREE.ExtrudeGeometry(steleShape, {
+      depth: 0.16,
+      bevelEnabled: true,
+      bevelThickness: 0.032,
+      bevelSize: 0.032,
+      bevelSegments: 5,
     })
   );
-  monolithGroup.add(new THREE.LineSegments(edgeGeo, edgeMat));
+  steleGeo.center();
+  const steleMesh = new THREE.Mesh(steleGeo, obsidianSteleMat);
+  monolithGroup.add(steleMesh);
+
+  // Etched calligraphy front face mounted cleanly on beveled stele
+  const frontPlaqueGeo = trackGeo(new THREE.PlaneGeometry(2.02, 3.06));
+  const frontPlaqueMesh = new THREE.Mesh(frontPlaqueGeo, monolithFrontMat);
+  frontPlaqueMesh.position.z = 0.114;
+  monolithGroup.add(frontPlaqueMesh);
+
+  // Recessed brushed-gold architectural trim strips (catches studio specular highlights)
+  const goldTrimMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#dfc07c',
+      metalness: 0.98,
+      roughness: 0.15,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 1.6,
+    })
+  );
+  const verticalStripGeo = trackGeo(new THREE.BoxGeometry(0.036, 3.12, 0.042));
+  const leftGoldStrip = new THREE.Mesh(verticalStripGeo, goldTrimMat);
+  leftGoldStrip.position.set(-1.055, 0, 0.088);
+  const rightGoldStrip = new THREE.Mesh(verticalStripGeo, goldTrimMat);
+  rightGoldStrip.position.set(1.055, 0, 0.088);
+
+  const horizontalStripGeo = trackGeo(new THREE.BoxGeometry(2.14, 0.036, 0.042));
+  const topGoldStrip = new THREE.Mesh(horizontalStripGeo, goldTrimMat);
+  topGoldStrip.position.set(0, 1.575, 0.088);
+  const bottomGoldStrip = new THREE.Mesh(horizontalStripGeo, goldTrimMat);
+  bottomGoldStrip.position.set(0, -1.575, 0.088);
+
+  // Side recessed brass reveals running down the stele flanks
+  const flankRevealGeo = trackGeo(new THREE.BoxGeometry(0.018, 2.94, 0.046));
+  const leftFlank = new THREE.Mesh(flankRevealGeo, goldTrimMat);
+  leftFlank.position.set(-1.084, 0, 0);
+  const rightFlank = new THREE.Mesh(flankRevealGeo, goldTrimMat);
+  rightFlank.position.set(1.084, 0, 0);
+
+  monolithGroup.add(
+    leftGoldStrip,
+    rightGoldStrip,
+    topGoldStrip,
+    bottomGoldStrip,
+    leftFlank,
+    rightFlank
+  );
 
   // --- Ambient Floating Gold Pollen Particles ---
   const POLLEN_COUNT = 180;
