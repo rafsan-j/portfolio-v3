@@ -1,61 +1,53 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/content/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
   theme: {
     extend: {
-      colors: {
-        void:       '#050505',
-        surface:    '#0d0d12',
-        panel:      '#111118',
-        'panel-c':  '#111118',
-        'border-c': '#1a1a2e',
-        neon:       '#00ff88',
-        cyan:       '#00d4ff',
-        amber:      '#ffb400',
-        muted:      '#4a4a6a',
-        dim:        '#2a2a3e',
-        ghost:      '#8888aa',
-        snow:       '#e8e8f0',
-      },
-      borderColor: {
-        DEFAULT: '#1a1a2e',
-        border:  '#1a1a2e',
-      },
       fontFamily: {
-        mono:    ['JetBrains Mono', 'monospace'],
-        display: ['Orbitron', 'monospace'],
-        sans:    ['Space Grotesk', 'sans-serif'],
-        serif:   ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: [
+          'var(--font-jetbrains-mono)',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'monospace',
+        ],
       },
-      animation: {
-        'pulse-neon':   'pulseNeon 2s ease-in-out infinite',
-        'cursor-blink': 'blink 1s step-end infinite',
-        'fade-up':      'fadeUp 0.6s ease forwards',
-        'float-slow':   'floatSlow 6s ease-in-out infinite',
+      colors: {
+        canvas: 'var(--bg-canvas)',
+        surface: 'var(--bg-surface)',
+        track: 'var(--bg-track)',
+        ink: {
+          primary: 'var(--ink-primary)',
+          secondary: 'var(--ink-secondary)',
+          'on-accent': 'var(--ink-on-accent)',
+        },
+        border: {
+          neutral: 'var(--border-neutral)',
+          hover: 'var(--border-hover)',
+          interactive: 'var(--border-interactive)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          tint: 'var(--accent-tint)',
+        },
       },
-      keyframes: {
-        pulseNeon: {
-          '0%, 100%': { boxShadow: '0 0 5px #00ff88, 0 0 10px #00ff88' },
-          '50%':      { boxShadow: '0 0 20px #00ff88, 0 0 40px #00ff88' },
-        },
-        blink: {
-          '0%, 100%': { opacity: '1' },
-          '50%':      { opacity: '0' },
-        },
-        fadeUp: {
-          from: { opacity: '0', transform: 'translateY(24px)' },
-          to:   { opacity: '1', transform: 'translateY(0)' },
-        },
-        floatSlow: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%':      { transform: 'translateY(-8px)' },
-        },
+      transitionTimingFunction: {
+        obsidian: 'var(--ease-obsidian)',
+      },
+      transitionDuration: {
+        fast: 'var(--dur-fast)',
+        base: 'var(--dur-base)',
+        slow: 'var(--dur-slow)',
       },
       boxShadow: {
-        neon:      '0 0 10px rgba(0,255,136,0.5), 0 0 20px rgba(0,255,136,0.2)',
-        'neon-lg': '0 0 20px rgba(0,255,136,0.6), 0 0 40px rgba(0,255,136,0.3)',
-        cyan:      '0 0 10px rgba(0,212,255,0.5)',
+        dock: 'var(--shadow-dock)',
+        modal: 'var(--shadow-modal)',
       },
     },
   },

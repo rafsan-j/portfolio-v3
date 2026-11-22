@@ -1,48 +1,93 @@
-import type { Metadata, Viewport } from 'next';
-import '@/styles/globals.css';
-import { VisitorModeProvider } from '@/components/ui/VisitorModeProvider';
-import { CommandPalette }      from '@/components/ui/CommandPalette';
-import { Terminal }            from '@/components/ui/Terminal';
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
+import { PROFILE } from '@/content/profile';
+import { FLAGSHIP_PROJECTS } from '@/content/projects';
+import { ESSAYS } from '@/content/writing';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { ShellChrome } from '@/components/layout/ShellChrome';
+import { Footer } from '@/components/layout/Footer';
+import { CommandPalette } from '@/components/CommandPalette';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://rafsanjani.dev';
 
 export const metadata: Metadata = {
-  title: { default: 'Rafsan Jani — CSE @ SUST & AI Automation Builder', template: '%s | Rafsan Jani' },
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${PROFILE.name} — Software Engineer & SUST CSE`,
+    template: `%s · ${PROFILE.name}`,
+  },
   description:
-    'B.Sc. in CSE at SUST, AI & Automation Executive at Waffle Up, Educator at Tworon, and Top 0.01% National Merit Scholar (17th). Builder of Kairyn v5.1, S_Track, and AgriBase.',
-  keywords: [
-    'Rafsan Jani',
-    'SUST CSE',
-    'Kairyn',
-    'Waffle Up',
-    'Tworon',
-    'AgriBase',
-    'Bangladesh',
-    'Software Engineer',
-    'AI Automation',
-  ],
-  authors: [{ name: 'Rafsan Jani' }],
+    'Offline-first native Android apps, applied AI systems, and procedural visual software by Rafsan Jani in Sylhet, Bangladesh.',
+  authors: [{ name: PROFILE.name }],
+  creator: PROFILE.name,
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    siteName: 'Rafsan Jani',
-    title: 'Rafsan Jani — Software Engineer & AI Automation Builder',
+    url: SITE_URL,
+    siteName: PROFILE.name,
+    title: `${PROFILE.name} — Software Engineer & SUST CSE`,
     description:
-      'CSE @ SUST · Top 0.01% National Merit · Builder of Kairyn 3D Android OS, S_Track, and AgriBase.',
+      'Offline-first native Android apps, applied AI systems, and procedural visual software built in Sylhet, Bangladesh.',
   },
-  twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: 'summary',
+    title: `${PROFILE.name} — Software Engineer & SUST CSE`,
+    description:
+      'Offline-first native Android apps, applied AI systems, and procedural visual software.',
+  },
 };
 
-export const viewport: Viewport = { themeColor: '#050505', colorScheme: 'dark' };
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}else{document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const COMMAND_PROJECTS = FLAGSHIP_PROJECTS.map(({ slug, title, tagline }) => ({
+  slug,
+  title,
+  tagline,
+}));
+
+const COMMAND_ESSAYS = ESSAYS.map(({ slug, title }) => ({
+  slug,
+  title,
+}));
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen antialiased">
-        <VisitorModeProvider>
-          {children}
-          <CommandPalette />
-          <Terminal />
-        </VisitorModeProvider>
+    <html
+      lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-screen bg-[var(--bg-canvas)] text-[var(--ink-primary)] font-sans antialiased">
+        <ThemeProvider>
+          <ShellChrome footer={<Footer />}>{children}</ShellChrome>
+          <CommandPalette
+            projects={COMMAND_PROJECTS}
+            essays={COMMAND_ESSAYS}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );
