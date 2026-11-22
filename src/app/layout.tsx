@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Instrument_Serif, Inter, JetBrains_Mono } from 'next/font/google';
+import { Cormorant_Garamond, DM_Mono, Manrope } from 'next/font/google';
 import './globals.css';
 import { PROFILE } from '@/content/profile';
 import { FLAGSHIP_PROJECTS } from '@/content/projects';
@@ -8,26 +8,27 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { ShellChrome } from '@/components/layout/ShellChrome';
 import { Footer } from '@/components/layout/Footer';
 import { CommandPalette } from '@/components/CommandPalette';
+import { CursorPreviewProvider } from '@/components/motion/CursorPreview';
 
-const inter = Inter({
+const cormorantGaramond = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const instrumentSerif = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
+  weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
-  variable: '--font-instrument-serif',
+  variable: '--font-cormorant',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
+const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
-  variable: '--font-jetbrains-mono',
+  variable: '--font-dm-mono',
   display: 'swap',
 });
 
@@ -83,14 +84,16 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
+      className={`${cormorantGaramond.variable} ${manrope.variable} ${dmMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-screen bg-[var(--bg-canvas)] text-[var(--ink-primary)] font-sans antialiased">
         <ThemeProvider>
-          <ShellChrome footer={<Footer />}>{children}</ShellChrome>
+          <ShellChrome footer={<Footer />}>
+            <CursorPreviewProvider>{children}</CursorPreviewProvider>
+          </ShellChrome>
           <CommandPalette
             projects={COMMAND_PROJECTS}
             essays={COMMAND_ESSAYS}

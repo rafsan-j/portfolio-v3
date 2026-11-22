@@ -8,15 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
-        mono: [
-          'var(--font-jetbrains-mono)',
-          'ui-monospace',
-          'SFMono-Regular',
-          'Menlo',
-          'monospace',
-        ],
+        serif: ['var(--font-cormorant)', 'Georgia', 'serif'],
+        sans: ['var(--font-manrope)', 'sans-serif'],
+        mono: ['var(--font-dm-mono)', 'monospace'],
       },
       colors: {
         canvas: 'var(--bg-canvas)',
