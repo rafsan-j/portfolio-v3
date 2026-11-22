@@ -224,7 +224,7 @@ export function createOttoVaultWorld(): WorldHandle & {
   underFill.position.set(0, -3.5, 2.0);
   group.add(ambient, rimEmerald, rimIvory, underFill);
 
-  // --- Matte-Obsidian Android Smartphone ---
+  // --- Chamfered Bead-Blasted Titanium Android Smartphone ---
   const phoneGroup = new THREE.Group();
   group.add(phoneGroup);
 
@@ -238,59 +238,94 @@ export function createOttoVaultWorld(): WorldHandle & {
       bevelEnabled: true,
       bevelThickness: 0.032,
       bevelSize: 0.028,
-      bevelSegments: 5,
+      bevelSegments: 6,
     })
   );
   bodyGeo.center();
 
-  const obsidianMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#111417',
-      roughness: 0.42,
-      metalness: 0.38,
+  const titaniumChassisMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#2d3336',
+      metalness: 0.95,
+      roughness: 0.18,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.16,
+      envMapIntensity: 1.4,
     })
   );
-  const phoneBody = new THREE.Mesh(bodyGeo, obsidianMat);
+  const phoneBody = new THREE.Mesh(bodyGeo, titaniumChassisMat);
   phoneGroup.add(phoneBody);
 
-  // Metallic camera bar on rear face
-  const titaniumMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#5b6664',
-      roughness: 0.24,
-      metalness: 0.9,
+  // Rear satin-obsidian glass backplate
+  const backGlassShape = createRoundedRectShape(phoneW - 0.12, phoneH - 0.12, 0.18);
+  const backGlassGeo = trackGeo(new THREE.ShapeGeometry(backGlassShape));
+  const backGlassMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#0e1316',
+      roughness: 0.1,
+      metalness: 0.12,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.55,
+      side: THREE.DoubleSide,
+    })
+  );
+  const backGlassMesh = new THREE.Mesh(backGlassGeo, backGlassMat);
+  backGlassMesh.position.z = -phoneD * 0.5 - 0.034;
+  phoneGroup.add(backGlassMesh);
+
+  // Machined titanium camera visor & sapphire lenses on rear face
+  const titaniumTrimMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#626f6c',
+      metalness: 0.96,
+      roughness: 0.16,
+      clearcoat: 0.45,
+      clearcoatRoughness: 0.14,
+      envMapIntensity: 1.45,
     })
   );
   const cameraBar = new THREE.Mesh(
     trackGeo(new THREE.BoxGeometry(1.52, 0.34, 0.075)),
-    titaniumMat
+    titaniumTrimMat
   );
-  cameraBar.position.set(0, 0.96, -phoneD * 0.5 - 0.045);
+  cameraBar.position.set(0, 0.96, -phoneD * 0.5 - 0.048);
   phoneGroup.add(cameraBar);
 
   const lensMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#090d10',
-      roughness: 0.08,
-      metalness: 0.85,
+    new THREE.MeshPhysicalMaterial({
+      color: '#070b0f',
+      roughness: 0.05,
+      metalness: 0.25,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03,
+      iridescence: 0.65,
+      iridescenceIOR: 1.35,
+      envMapIntensity: 1.6,
     })
   );
   const lensGeo = trackGeo(new THREE.CylinderGeometry(0.085, 0.085, 0.02, 24));
   lensGeo.rotateX(Math.PI / 2);
   for (let i = 0; i < 3; i++) {
     const lens = new THREE.Mesh(lensGeo, lensMat);
-    lens.position.set(-0.38 + i * 0.28, 0.96, -phoneD * 0.5 - 0.086);
+    lens.position.set(-0.38 + i * 0.28, 0.96, -phoneD * 0.5 - 0.088);
     phoneGroup.add(lens);
   }
 
   // Side volume & power buttons
-  const powerBtn = new THREE.Mesh(trackGeo(new THREE.BoxGeometry(0.03, 0.24, 0.05)), titaniumMat);
+  const powerBtn = new THREE.Mesh(
+    trackGeo(new THREE.BoxGeometry(0.03, 0.24, 0.05)),
+    titaniumTrimMat
+  );
   powerBtn.position.set(phoneW * 0.5 + 0.03, 0.48, 0);
-  const volBtn = new THREE.Mesh(trackGeo(new THREE.BoxGeometry(0.03, 0.48, 0.05)), titaniumMat);
+  const volBtn = new THREE.Mesh(
+    trackGeo(new THREE.BoxGeometry(0.03, 0.48, 0.05)),
+    titaniumTrimMat
+  );
   volBtn.position.set(phoneW * 0.5 + 0.03, -0.02, 0);
   phoneGroup.add(powerBtn, volBtn);
 
-  // OLED Screen with smooth Revealed <-> Stealth GLSL shader
+  // OLED Screen with smooth Revealed <-> Stealth GLSL shader + protective front glass sheen
   const revealedTex = trackTex(createOttoScreenTexture(false));
   const stealthTex = trackTex(createOttoScreenTexture(true));
   const oledUniforms = {
@@ -311,55 +346,106 @@ export function createOttoVaultWorld(): WorldHandle & {
   screenMesh.position.z = phoneD * 0.5 + 0.035;
   phoneGroup.add(screenMesh);
 
+  const frontGlassMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#ffffff',
+      roughness: 0.04,
+      metalness: 0.0,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.02,
+      envMapIntensity: 1.55,
+      transparent: true,
+      opacity: 0.11,
+      depthWrite: false,
+    })
+  );
+  const frontGlassMesh = new THREE.Mesh(screenGeo, frontGlassMat);
+  frontGlassMesh.position.z = phoneD * 0.5 + 0.039;
+  phoneGroup.add(frontGlassMesh);
+
   // --- Multi-Layer Rotating 3D Cryptographic Shield ---
   const shieldGroup = new THREE.Group();
   group.add(shieldGroup);
 
-  // 1. Outer Geodesic Icosahedron Wireframe
-  const icoBaseGeo = trackGeo(new THREE.IcosahedronGeometry(3.35, 1));
+  // 1. Lusion-Style Chromatic Crystal Glass Vault Shell + Facet Seam Wireframe
+  const icoBaseGeo = trackGeo(new THREE.IcosahedronGeometry(3.32, 1));
+  const crystalVaultMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#ecfff8',
+      transmission: 0.92,
+      ior: 1.52,
+      thickness: 1.4,
+      roughness: 0.06,
+      metalness: 0.0,
+      iridescence: 0.9,
+      iridescenceIOR: 1.3,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.5,
+      attenuationColor: new THREE.Color('#4eb895'),
+      attenuationDistance: 4.5,
+      transparent: true,
+    })
+  );
+  // Set chromatic dispersion safely (supported in Three.js r165+)
+  if ('dispersion' in crystalVaultMat) {
+    (crystalVaultMat as THREE.MeshPhysicalMaterial & { dispersion: number }).dispersion = 3.2;
+  }
+
+  const vaultShellGroup = new THREE.Group();
+  const crystalShellMesh = new THREE.Mesh(icoBaseGeo, crystalVaultMat);
+  vaultShellGroup.add(crystalShellMesh);
+
   const icoEdgesGeo = trackGeo(new THREE.EdgesGeometry(icoBaseGeo));
   const icoLineMat = trackMat(
     new THREE.LineBasicMaterial({
-      color: '#5fa88e',
+      color: '#7cdbc0',
       transparent: true,
       opacity: 0.34,
     })
   );
   const geodesicWire = new THREE.LineSegments(icoEdgesGeo, icoLineMat);
-  shieldGroup.add(geodesicWire);
+  geodesicWire.scale.setScalar(1.003);
+  vaultShellGroup.add(geodesicWire);
+  shieldGroup.add(vaultShellGroup);
 
-  // 2. Inner Brushed-Cypress-Emerald Torus Rings
-  const cypressBrassMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#3f6e5d',
-      roughness: 0.28,
-      metalness: 0.86,
-      emissive: '#142921',
-      emissiveIntensity: 0.55,
+  // 2. Machined Emerald-Chrome Orbital Rings
+  const emeraldChromeMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#438f76',
+      metalness: 0.94,
+      roughness: 0.14,
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.1,
+      envMapIntensity: 1.55,
+      emissive: '#103428',
+      emissiveIntensity: 0.35,
     })
   );
 
-  const ring1 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.55, 0.038, 16, 96)), cypressBrassMat);
+  const ring1 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.55, 0.038, 20, 108)), emeraldChromeMat);
   ring1.rotation.set(Math.PI * 0.38, 0.25, 0);
 
-  const ring2 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.85, 0.028, 16, 96)), cypressBrassMat);
+  const ring2 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.85, 0.028, 20, 108)), emeraldChromeMat);
   ring2.rotation.set(-Math.PI * 0.28, Math.PI * 0.42, 0.3);
 
-  const ring3 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.28, 0.024, 16, 84)), cypressBrassMat);
+  const ring3 = new THREE.Mesh(trackGeo(new THREE.TorusGeometry(2.28, 0.024, 20, 96)), emeraldChromeMat);
   ring3.rotation.set(Math.PI * 0.52, -0.35, 0.45);
 
   shieldGroup.add(ring1, ring2, ring3);
 
-  // 3. 24 Orbiting Encrypted Shard Polyhedra
+  // 3. 24 Orbiting Bloom-Accented Cipher Nodes
   const SHARD_COUNT = 24;
-  const shardGeo = trackGeo(new THREE.OctahedronGeometry(0.145, 0));
+  const shardGeo = trackGeo(new THREE.OctahedronGeometry(0.135, 0));
   const shardMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#1b2b27',
-      emissive: '#3e8c72',
-      emissiveIntensity: 0.65,
-      roughness: 0.26,
-      metalness: 0.82,
+    new THREE.MeshPhysicalMaterial({
+      color: '#203b34',
+      emissive: '#4ee6b3',
+      emissiveIntensity: 1.35,
+      roughness: 0.16,
+      metalness: 0.88,
+      clearcoat: 0.8,
+      envMapIntensity: 1.4,
     })
   );
 
@@ -405,11 +491,11 @@ export function createOttoVaultWorld(): WorldHandle & {
       phoneGroup.rotation.y = THREE.MathUtils.lerp(phoneGroup.rotation.y, targetPhoneRotY, alpha * 1.5);
       phoneGroup.rotation.x = THREE.MathUtils.lerp(phoneGroup.rotation.x, targetPhoneRotX, alpha * 1.5);
 
-      // Shield physically tightens/locks around the phone in stealth mode, expands when revealed
-      const geodesicScale = THREE.MathUtils.lerp(1.12, 0.78, stealthMix);
-      geodesicWire.scale.setScalar(geodesicScale);
-      geodesicWire.rotation.y = elapsed * (0.14 + stealthMix * 0.18);
-      geodesicWire.rotation.x = Math.sin(elapsed * 0.22) * 0.25;
+      // Chromatic crystal vault shell & wireframe physically tighten/expand smoothly with stealth
+      const vaultScale = THREE.MathUtils.lerp(1.12, 0.78, stealthMix);
+      vaultShellGroup.scale.setScalar(vaultScale);
+      vaultShellGroup.rotation.y = elapsed * (0.14 + stealthMix * 0.18);
+      vaultShellGroup.rotation.x = Math.sin(elapsed * 0.22) * 0.25;
       icoLineMat.opacity = THREE.MathUtils.lerp(0.24, 0.62, stealthMix);
 
       const ringScale = THREE.MathUtils.lerp(1.14, 0.84, stealthMix);
@@ -422,10 +508,10 @@ export function createOttoVaultWorld(): WorldHandle & {
       ring2.rotation.y = elapsed * -0.22 * spinBoost;
       ring3.rotation.x = Math.PI * 0.52 + elapsed * 0.32 * spinBoost;
 
-      cypressBrassMat.emissiveIntensity = THREE.MathUtils.lerp(0.4, 1.15, stealthMix);
-      shardMat.emissiveIntensity = THREE.MathUtils.lerp(0.5, 1.35, stealthMix);
+      emeraldChromeMat.emissiveIntensity = THREE.MathUtils.lerp(0.28, 0.85, stealthMix);
+      shardMat.emissiveIntensity = THREE.MathUtils.lerp(1.3, 2.25, stealthMix);
 
-      // 24 orbiting encrypted shards tighten inward & lock formation when stealth is active
+      // 24 orbiting bloom-accented cipher nodes tighten inward & lock formation in stealth
       for (let i = 0; i < shards.length; i++) {
         const s = shards[i];
         const radius = THREE.MathUtils.lerp(s.baseRadius * 1.16, s.baseRadius * 0.68, stealthMix);

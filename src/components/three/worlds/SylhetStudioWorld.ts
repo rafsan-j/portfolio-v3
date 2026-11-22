@@ -397,7 +397,7 @@ export function createSylhetStudioWorld(): WorldHandle & {
   keyLight.position.set(2.5, 4.2, 3.8);
   group.add(keyLight);
 
-  // --- Beveled Walnut Desktop ---
+  // --- Beveled Walnut Desktop (Lacquer Clearcoat PBR) ---
   const walnutTex = trackTex(createWalnutTexture());
   const deskShape = createRoundedRectShape(7.2, 3.2, 0.16);
   const deskGeo = trackGeo(
@@ -406,27 +406,33 @@ export function createSylhetStudioWorld(): WorldHandle & {
       bevelEnabled: true,
       bevelThickness: 0.035,
       bevelSize: 0.035,
-      bevelSegments: 4,
+      bevelSegments: 5,
     })
   );
   deskGeo.rotateX(Math.PI / 2);
   const deskMat = trackMat(
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhysicalMaterial({
       map: walnutTex,
-      roughness: 0.56,
-      metalness: 0.08,
+      roughness: 0.42,
+      metalness: 0.05,
+      clearcoat: 0.72,
+      clearcoatRoughness: 0.24,
+      envMapIntensity: 1.15,
     })
   );
   const deskMesh = new THREE.Mesh(deskGeo, deskMat);
   deskMesh.position.set(0, -1.0, 0);
   group.add(deskMesh);
 
-  // Matte-steel desk legs
+  // Anodized dark-steel desk legs
   const legMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#171a1f',
-      roughness: 0.5,
-      metalness: 0.72,
+    new THREE.MeshPhysicalMaterial({
+      color: '#171b21',
+      roughness: 0.34,
+      metalness: 0.84,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.3,
+      envMapIntensity: 1.15,
     })
   );
   const legGeo = trackGeo(new THREE.BoxGeometry(0.12, 2.2, 2.4));
@@ -457,10 +463,12 @@ export function createSylhetStudioWorld(): WorldHandle & {
 
   // Window frame & mullions
   const frameMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#181c22',
-      roughness: 0.42,
-      metalness: 0.65,
+    new THREE.MeshPhysicalMaterial({
+      color: '#191e26',
+      roughness: 0.32,
+      metalness: 0.78,
+      clearcoat: 0.25,
+      envMapIntensity: 1.15,
     })
   );
   const mullionV = new THREE.Mesh(trackGeo(new THREE.BoxGeometry(0.08, 2.8, 0.18)), frameMat);
@@ -491,21 +499,24 @@ export function createSylhetStudioWorld(): WorldHandle & {
   rainPane.position.set(0, 0.8, wallZ - 0.06);
   group.add(rainPane);
 
-  // --- Brushed-Brass Gooseneck Edison Desk Lamp ---
+  // --- Gleaming Studio Brushed-Brass Gooseneck Edison Desk Lamp ---
   const lampGroup = new THREE.Group();
   lampGroup.position.set(-2.35, -0.98, -0.45);
   group.add(lampGroup);
 
   const brassMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#c9a259',
-      roughness: 0.3,
-      metalness: 0.88,
+    new THREE.MeshPhysicalMaterial({
+      color: '#d4ac61',
+      metalness: 0.96,
+      roughness: 0.18,
+      clearcoat: 0.28,
+      clearcoatRoughness: 0.18,
+      envMapIntensity: 1.45,
     })
   );
 
   const lampBase = new THREE.Mesh(
-    trackGeo(new THREE.CylinderGeometry(0.32, 0.38, 0.09, 32)),
+    trackGeo(new THREE.CylinderGeometry(0.32, 0.38, 0.09, 36)),
     brassMat
   );
   lampBase.position.y = 0.045;
@@ -517,7 +528,7 @@ export function createSylhetStudioWorld(): WorldHandle & {
     new THREE.Vector3(0.05, 1.82, 0.06),
     new THREE.Vector3(0.58, 1.66, 0.22),
   ]);
-  const neckGeo = trackGeo(new THREE.TubeGeometry(neckCurve, 36, 0.032, 12, false));
+  const neckGeo = trackGeo(new THREE.TubeGeometry(neckCurve, 40, 0.032, 16, false));
   const neckMesh = new THREE.Mesh(neckGeo, brassMat);
   lampGroup.add(neckMesh);
 
@@ -526,28 +537,63 @@ export function createSylhetStudioWorld(): WorldHandle & {
   shadeGroup.rotation.set(0.28, 0, -0.34);
   lampGroup.add(shadeGroup);
 
-  const shadeGeo = trackGeo(new THREE.ConeGeometry(0.32, 0.36, 32, 1, true));
+  const shadeGeo = trackGeo(new THREE.ConeGeometry(0.32, 0.36, 36, 1, true));
   const shadeMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#b8914a',
-      roughness: 0.28,
-      metalness: 0.9,
+    new THREE.MeshPhysicalMaterial({
+      color: '#c9a055',
+      metalness: 0.96,
+      roughness: 0.18,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.2,
+      envMapIntensity: 1.45,
       side: THREE.DoubleSide,
     })
   );
   const shadeMesh = new THREE.Mesh(shadeGeo, shadeMat);
   shadeGroup.add(shadeMesh);
 
+  // Bloom-emitting Edison filament core + clear glass globe envelope
   const bulbMat = trackMat(
     new THREE.MeshStandardMaterial({
-      color: '#fff2d6',
+      color: '#fff6e0',
       emissive: activePreset.bulbEmissive.clone(),
       emissiveIntensity: 3.4,
-      roughness: 0.15,
+      roughness: 0.12,
       metalness: 0.0,
     })
   );
-  const bulbMesh = new THREE.Mesh(trackGeo(new THREE.SphereGeometry(0.085, 18, 18)), bulbMat);
+  const filamentCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.022, -0.075, 0),
+    new THREE.Vector3(-0.032, -0.145, 0.014),
+    new THREE.Vector3(0, -0.175, 0),
+    new THREE.Vector3(0.032, -0.145, -0.014),
+    new THREE.Vector3(0.022, -0.075, 0),
+  ]);
+  const filamentMesh = new THREE.Mesh(
+    trackGeo(new THREE.TubeGeometry(filamentCurve, 24, 0.012, 8, false)),
+    bulbMat
+  );
+  shadeGroup.add(filamentMesh);
+
+  const filamentCore = new THREE.Mesh(trackGeo(new THREE.SphereGeometry(0.038, 16, 16)), bulbMat);
+  filamentCore.position.y = -0.14;
+  shadeGroup.add(filamentCore);
+
+  const bulbGlassMat = trackMat(
+    new THREE.MeshPhysicalMaterial({
+      color: '#ffefd4',
+      transmission: 0.84,
+      ior: 1.48,
+      thickness: 0.18,
+      roughness: 0.06,
+      metalness: 0.0,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.35,
+      transparent: true,
+    })
+  );
+  const bulbMesh = new THREE.Mesh(trackGeo(new THREE.SphereGeometry(0.09, 24, 24)), bulbGlassMat);
   bulbMesh.position.y = -0.14;
   shadeGroup.add(bulbMesh);
 
@@ -594,7 +640,7 @@ export function createSylhetStudioWorld(): WorldHandle & {
   bulbPoint.position.set(-1.72, 0.48, -0.2);
   group.add(bulbPoint);
 
-  // --- Curved Ultrawide Monitor ---
+  // --- Curved Ultrawide Monitor (Brushed Anodized Titanium) ---
   const monitorGroup = new THREE.Group();
   monitorGroup.position.set(0.18, 0.06, -0.78);
   group.add(monitorGroup);
@@ -640,7 +686,7 @@ export function createSylhetStudioWorld(): WorldHandle & {
   screenMesh.position.z = curveRadius;
   monitorGroup.add(screenMesh);
 
-  // Monitor backshell
+  // Monitor backshell & stand in brushed anodized titanium
   const bezelGeo = trackGeo(
     new THREE.CylinderGeometry(
       curveRadius + 0.03,
@@ -654,10 +700,13 @@ export function createSylhetStudioWorld(): WorldHandle & {
     )
   );
   const bezelMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#14171c',
-      roughness: 0.38,
-      metalness: 0.75,
+    new THREE.MeshPhysicalMaterial({
+      color: '#252a32',
+      metalness: 0.92,
+      roughness: 0.22,
+      clearcoat: 0.4,
+      clearcoatRoughness: 0.18,
+      envMapIntensity: 1.35,
       side: THREE.DoubleSide,
     })
   );
@@ -679,10 +728,13 @@ export function createSylhetStudioWorld(): WorldHandle & {
   group.add(kbGroup);
 
   const kbCaseMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#171a20',
-      roughness: 0.42,
-      metalness: 0.62,
+    new THREE.MeshPhysicalMaterial({
+      color: '#1b1f27',
+      roughness: 0.26,
+      metalness: 0.85,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.2,
+      envMapIntensity: 1.25,
     })
   );
   const kbCase = new THREE.Mesh(trackGeo(new THREE.BoxGeometry(1.62, 0.075, 0.56)), kbCaseMat);
@@ -691,15 +743,17 @@ export function createSylhetStudioWorld(): WorldHandle & {
   const keyMat = trackMat(
     new THREE.MeshStandardMaterial({
       color: '#232832',
-      roughness: 0.55,
+      roughness: 0.52,
       metalness: 0.18,
     })
   );
   const accentKeyMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#c98842',
-      roughness: 0.45,
-      metalness: 0.2,
+    new THREE.MeshPhysicalMaterial({
+      color: '#cf8f48',
+      roughness: 0.32,
+      metalness: 0.28,
+      clearcoat: 0.4,
+      envMapIntensity: 1.15,
     })
   );
   const keyGeo = trackGeo(new THREE.BoxGeometry(0.082, 0.036, 0.082));
@@ -713,10 +767,14 @@ export function createSylhetStudioWorld(): WorldHandle & {
   }
 
   const underglowMat = trackMat(
-    new THREE.MeshBasicMaterial({
+    new THREE.MeshStandardMaterial({
       color: '#ff9d3b',
+      emissive: '#ff9d3b',
+      emissiveIntensity: 1.35,
+      roughness: 0.3,
+      metalness: 0.0,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
     })
   );
   const underglowStrip = new THREE.Mesh(
@@ -726,7 +784,7 @@ export function createSylhetStudioWorld(): WorldHandle & {
   underglowStrip.position.y = -0.034;
   kbGroup.add(underglowStrip);
 
-  // --- Ceramic Coffee Mug + Procedural Steam Particles ---
+  // --- Glossy Porcelain Coffee Mug + Procedural Steam Particles ---
   const mugGroup = new THREE.Group();
   mugGroup.position.set(1.92, -0.98, 0.25);
   group.add(mugGroup);
@@ -741,17 +799,20 @@ export function createSylhetStudioWorld(): WorldHandle & {
     new THREE.Vector2(0.0, 0.05),
   ];
   const mugMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#d8cfc2',
-      roughness: 0.36,
-      metalness: 0.06,
+    new THREE.MeshPhysicalMaterial({
+      color: '#dfd6c8',
+      roughness: 0.22,
+      metalness: 0.02,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.08,
+      envMapIntensity: 1.25,
     })
   );
-  const mugMesh = new THREE.Mesh(trackGeo(new THREE.LatheGeometry(mugProfile, 28)), mugMat);
+  const mugMesh = new THREE.Mesh(trackGeo(new THREE.LatheGeometry(mugProfile, 32)), mugMat);
   mugGroup.add(mugMesh);
 
   const handleMesh = new THREE.Mesh(
-    trackGeo(new THREE.TorusGeometry(0.095, 0.02, 12, 24, Math.PI)),
+    trackGeo(new THREE.TorusGeometry(0.095, 0.02, 14, 28, Math.PI)),
     mugMat
   );
   handleMesh.rotation.z = -Math.PI * 0.5;
@@ -759,10 +820,13 @@ export function createSylhetStudioWorld(): WorldHandle & {
   mugGroup.add(handleMesh);
 
   const coffeeMat = trackMat(
-    new THREE.MeshStandardMaterial({
-      color: '#1c1009',
-      roughness: 0.12,
-      metalness: 0.1,
+    new THREE.MeshPhysicalMaterial({
+      color: '#190e07',
+      roughness: 0.06,
+      metalness: 0.05,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      envMapIntensity: 1.35,
     })
   );
   const coffeeDisc = new THREE.Mesh(trackGeo(new THREE.CircleGeometry(0.155, 24)), coffeeMat);

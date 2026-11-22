@@ -11,6 +11,15 @@ import React, {
 import Image from 'next/image';
 import Link from 'next/link';
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ArrowUpRight,
   Compass,
@@ -329,6 +338,60 @@ const HOLD_DURATION_MS = 450;
 const INTERACTIVE_SELECTOR =
   'button, a, input, textarea, select, [role="slider"], [data-hud-interactive="true"]';
 
+const CinematicLensShader = {
+  uniforms: {
+    tDiffuse: { value: null as THREE.Texture | null },
+    uTime: { value: 0 },
+    uAberration: { value: 0.0012 },
+    uGrain: { value: 0.022 },
+    uVignette: { value: 0.3 },
+  },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    uniform float uTime;
+    uniform float uAberration;
+    uniform float uGrain;
+    uniform float uVignette;
+    varying vec2 vUv;
+
+    float hash12(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+      vec2 dir = vUv - vec2(0.5);
+      float dist = length(dir);
+
+      // Subtle optical edge chromatic aberration (0.0012 radial RGB split)
+      vec2 shift = dir * uAberration * smoothstep(0.18, 0.85, dist);
+      float r = texture2D(tDiffuse, clamp(vUv + shift, 0.0, 1.0)).r;
+      float g = texture2D(tDiffuse, vUv).g;
+      float b = texture2D(tDiffuse, clamp(vUv - shift, 0.0, 1.0)).b;
+      float a = texture2D(tDiffuse, vUv).a;
+      vec3 color = vec3(r, g, b);
+
+      // Soft cinema vignette
+      float vig = 1.0 - smoothstep(0.45, 1.15, dist) * uVignette;
+      color *= vig;
+
+      // Subtle time-seeded analog film grain
+      float grain = (hash12(gl_FragCoord.xy + fract(uTime * 0.618) * 256.0) - 0.5) * uGrain;
+      color = max(color + vec3(grain), 0.0);
+
+      gl_FragColor = vec4(color, a);
+    }
+  `,
+};
+
 /* ========================================================================== */
 /* COMPONENT: SpatialPortfolioExperience                                      */
 /* ========================================================================== */
@@ -338,6 +401,7 @@ export function SpatialPortfolioExperience() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const worldsRef = useRef<WorldHandles | null>(null);
   const forceRenderRef = useRef<(() => void) | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   const [webglFailed, setWebglFailed] = useState(false);
   const [activeChapter, setActiveChapter] = useState<number>(0);
@@ -439,13 +503,27 @@ export function SpatialPortfolioExperience() {
     cancelVaultHold();
   };
 
-  // Smooth chapter teleport
+  // Smooth chapter teleport via Lenis (native fallback for reduced motion)
   const teleportToChapter = useCallback((chapterIndex: number) => {
     const chapter = CHAPTERS[chapterIndex];
     if (!chapter) return;
     const el = document.getElementById(chapter.id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!el) return;
+
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if (lenisRef.current && !prefersReduced) {
+      lenisRef.current.scrollTo(el, {
+        duration: 1.35,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
+    } else {
+      el.scrollIntoView({
+        behavior: prefersReduced ? 'auto' : 'smooth',
+        block: 'start',
+      });
     }
   }, []);
 
@@ -483,11 +561,15 @@ export function SpatialPortfolioExperience() {
     );
     let reducedMotion = reducedMotionQuery.matches;
 
+    const initWidth = Math.max(1, window.innerWidth);
+    const initHeight = Math.max(1, window.innerHeight);
+    const initPixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
+
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(initPixelRatio);
+    renderer.setSize(initWidth, initHeight);
     renderer.domElement.style.display = 'block';
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -500,16 +582,48 @@ export function SpatialPortfolioExperience() {
     scene.fog = fog;
     scene.background = blendedFogColor;
 
+    // Studio HDRI environment via RoomEnvironment + PMREMGenerator
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const roomEnv = new RoomEnvironment();
+    const envRT = pmrem.fromScene(roomEnv, 0.04);
+    roomEnv.dispose();
+    scene.environment = envRT.texture;
+    scene.environmentIntensity = 0.85;
+
     // Subtle global atmospheric fill so transitions between worlds stay cohesive
     const globalHemi = new THREE.HemisphereLight(0xdbe6ef, 0x0b0d0e, 0.28);
     scene.add(globalHemi);
 
     const camera = new THREE.PerspectiveCamera(
       44,
-      window.innerWidth / Math.max(1, window.innerHeight),
+      initWidth / initHeight,
       0.1,
       190
     );
+
+    // Studio HDR Post-Processing Chain (EffectComposer)
+    const composerRT = new THREE.WebGLRenderTarget(initWidth, initHeight, {
+      type: THREE.HalfFloatType,
+      samples: renderer.capabilities.isWebGL2 ? 4 : 0,
+    });
+    const composer = new EffectComposer(renderer, composerRT);
+    composer.setPixelRatio(initPixelRatio);
+    composer.setSize(initWidth, initHeight);
+
+    const renderPass = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(initWidth, initHeight),
+      0.36,
+      0.48,
+      0.82
+    );
+    const lensPass = new ShaderPass(CinematicLensShader);
+    const outputPass = new OutputPass();
+
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
+    composer.addPass(lensPass);
+    composer.addPass(outputPass);
 
     // Build all 5 3D worlds at their spatial coordinates
     const studioWorld = createSylhetStudioWorld();
@@ -721,7 +835,8 @@ export function SpatialPortfolioExperience() {
         );
       }
 
-      renderer.render(scene, camera);
+      lensPass.uniforms.uTime.value = elapsed;
+      composer.render();
     };
 
     forceRenderRef.current = () => {
@@ -730,11 +845,37 @@ export function SpatialPortfolioExperience() {
       }
     };
 
+    gsap.registerPlugin(ScrollTrigger);
+
+    const initLenis = () => {
+      if (reducedMotion || lenisRef.current) return;
+      const lenis = new Lenis({
+        lerp: 0.075,
+        smoothWheel: true,
+        wheelMultiplier: 0.92,
+      });
+      lenis.on('scroll', () => {
+        ScrollTrigger.update();
+        syncScroll();
+      });
+      lenisRef.current = lenis;
+    };
+
+    const destroyLenis = () => {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
+    };
+
+    initLenis();
+
     const tick = (now: number) => {
       if (document.hidden || reducedMotion) {
         rafId = null;
         return;
       }
+      lenisRef.current?.raf(now);
       const dt = (now - lastNow) / 1000;
       lastNow = now;
       renderFrame(dt, false);
@@ -760,12 +901,17 @@ export function SpatialPortfolioExperience() {
     };
 
     const handleResize = () => {
-      const w = window.innerWidth;
+      const w = Math.max(1, window.innerWidth);
       const h = Math.max(1, window.innerHeight);
+      const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+      renderer.setPixelRatio(nextPixelRatio);
       renderer.setSize(w, h);
+      composer.setPixelRatio(nextPixelRatio);
+      composer.setSize(w, h);
+      bloomPass.setSize(w, h);
+      ScrollTrigger.refresh();
       if (reducedMotion) {
         renderFrame(0, true);
       }
@@ -827,8 +973,10 @@ export function SpatialPortfolioExperience() {
       reducedMotion = e.matches;
       if (reducedMotion) {
         stopLoop();
+        destroyLenis();
         renderFrame(0, true);
       } else {
+        initLenis();
         startLoop();
       }
     };
@@ -848,6 +996,7 @@ export function SpatialPortfolioExperience() {
 
     return () => {
       stopLoop();
+      destroyLenis();
       forceRenderRef.current = null;
       worldsRef.current = null;
 
@@ -869,6 +1018,16 @@ export function SpatialPortfolioExperience() {
       vellumWorld.dispose();
       messWorld.dispose();
 
+      bloomPass.dispose();
+      lensPass.dispose();
+      outputPass.dispose();
+      composer.dispose();
+      composerRT.dispose();
+
+      scene.environment = null;
+      envRT.dispose();
+      pmrem.dispose();
+
       renderer.dispose();
       if (renderer.domElement.parentNode === container) {
         container.removeChild(renderer.domElement);
@@ -876,6 +1035,126 @@ export function SpatialPortfolioExperience() {
     };
     // Initial world states are synced via dedicated effects above
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // GSAP ScrollTrigger editorial choreography for floating chapter HUD cards
+  useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+    if (prefersReduced) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(
+        '[data-chapter-card]',
+        scroller
+      );
+
+      cards.forEach((card, index) => {
+        const section = card.closest('section');
+        if (!section) return;
+
+        // Chapter 01 is immediately visible at scroll 0 on load
+        if (index === 0) {
+          gsap.set(card, { opacity: 1, y: 0 });
+          ScrollTrigger.create({
+            trigger: section,
+            start: 'top top',
+            end: 'bottom 28%',
+            onLeave: () => {
+              gsap.to(card, {
+                opacity: 0.14,
+                y: -18,
+                duration: 0.48,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              });
+            },
+            onEnterBack: () => {
+              gsap.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              });
+            },
+          });
+          return;
+        }
+
+        const isLastChapter = index === cards.length - 1;
+        gsap.set(card, { opacity: 0, y: 26 });
+
+        const st = ScrollTrigger.create({
+          trigger: section,
+          start: 'top 78%',
+          end: 'bottom 22%',
+          onEnter: () => {
+            gsap.fromTo(
+              card,
+              { opacity: 0, y: 26 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.75,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              }
+            );
+          },
+          onLeave: isLastChapter
+            ? undefined
+            : () => {
+                gsap.to(card, {
+                  opacity: 0.14,
+                  y: -20,
+                  duration: 0.45,
+                  ease: 'power3.out',
+                  overwrite: 'auto',
+                });
+              },
+          onEnterBack: () => {
+            gsap.fromTo(
+              card,
+              { opacity: 0.14, y: -20 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.68,
+                ease: 'power3.out',
+                overwrite: 'auto',
+              }
+            );
+          },
+          onLeaveBack: () => {
+            gsap.to(card, {
+              opacity: 0,
+              y: 26,
+              duration: 0.42,
+              ease: 'power3.out',
+              overwrite: 'auto',
+            });
+          },
+        });
+
+        // If page loaded already scrolled into this chapter, reveal immediately
+        if (st.isActive) {
+          gsap.set(card, { opacity: 1, y: 0 });
+        }
+      });
+    }, scroller);
+
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   const activeUjaan = UJAAN_DATA[ujaanScenario];
@@ -961,7 +1240,8 @@ export function SpatialPortfolioExperience() {
         >
           <div
             data-hud-interactive="true"
-            className={cn(glassCardClass, 'max-w-[470px]')}
+            data-chapter-card="studio"
+            className={cn(glassCardClass, 'max-w-[470px] will-change-transform')}
           >
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#D99B52]">01 · Living Sylhet Studio</span>
@@ -1038,7 +1318,11 @@ export function SpatialPortfolioExperience() {
           aria-labelledby="chapter-ujaan-heading"
           className="min-h-screen flex items-end md:items-center px-5 sm:px-8 lg:px-12 pt-24 pb-28 md:pb-24"
         >
-          <div data-hud-interactive="true" className={glassCardClass}>
+          <div
+            data-hud-interactive="true"
+            data-chapter-card="ujaan"
+            className={cn(glassCardClass, 'will-change-transform')}
+          >
             <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#56B6C2]">02 · Civic AI · Haor Basin</span>
               <span className="text-[#EDE7DA]/65 tnum">
@@ -1151,7 +1435,11 @@ export function SpatialPortfolioExperience() {
           aria-labelledby="chapter-ottobudget-heading"
           className="min-h-screen flex items-end md:items-center px-5 sm:px-8 lg:px-12 pt-24 pb-28 md:pb-24"
         >
-          <div data-hud-interactive="true" className={glassCardClass}>
+          <div
+            data-hud-interactive="true"
+            data-chapter-card="ottobudget"
+            className={cn(glassCardClass, 'will-change-transform')}
+          >
             <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#D99B52]">
                 03 · Native Android · Vault
@@ -1259,7 +1547,11 @@ export function SpatialPortfolioExperience() {
           aria-labelledby="chapter-vellum-heading"
           className="min-h-screen flex items-end md:items-center px-5 sm:px-8 lg:px-12 pt-24 pb-28 md:pb-24"
         >
-          <div data-hud-interactive="true" className={glassCardClass}>
+          <div
+            data-hud-interactive="true"
+            data-chapter-card="vellum"
+            className={cn(glassCardClass, 'will-change-transform')}
+          >
             <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#C9A46C]">
                 04 · Procedural Cinema · Remotion
@@ -1348,7 +1640,11 @@ export function SpatialPortfolioExperience() {
           aria-labelledby="chapter-mess-heading"
           className="min-h-screen flex items-end md:items-center px-5 sm:px-8 lg:px-12 pt-24 pb-28 md:pb-24"
         >
-          <div data-hud-interactive="true" className={glassCardClass}>
+          <div
+            data-hud-interactive="true"
+            data-chapter-card="mess-manager"
+            className={cn(glassCardClass, 'will-change-transform')}
+          >
             <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#D99B52]">
                 05 · Hamilton Ledger · Paisa
@@ -1441,7 +1737,8 @@ export function SpatialPortfolioExperience() {
         >
           <div
             data-hud-interactive="true"
-            className={cn(glassCardClass, 'max-w-[540px]')}
+            data-chapter-card="contact"
+            className={cn(glassCardClass, 'max-w-[540px] will-change-transform')}
           >
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#EDE7DA]/12 font-mono text-[11px] uppercase tracking-[0.16em]">
               <span className="text-[#D99B52]">
