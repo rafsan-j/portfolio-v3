@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { FLAGSHIP_PROJECTS, getProjectBySlug } from '@/content/projects';
 import { ProjectVisualHeader } from '@/components/ProjectVisualHeader';
+import { OttoBudgetInstrument } from '@/components/instruments/OttoBudgetInstrument';
+import { MessManagerInstrument } from '@/components/instruments/MessManagerInstrument';
+import { UjaanInstrument } from '@/components/instruments/UjaanInstrument';
+import { VellumInstrument } from '@/components/instruments/VellumInstrument';
+import { StudioHeroPortal } from '@/components/instruments/StudioHeroPortal';
 
 export const dynamicParams = false;
 
@@ -34,6 +39,27 @@ const STATUS_LABELS: Record<string, string> = {
   hackathon: 'Hackathon Build',
 };
 
+function renderProjectInstrument(slug: string) {
+  switch (slug) {
+    case 'ottobudget':
+      return <OttoBudgetInstrument />;
+    case 'mess-manager':
+      return <MessManagerInstrument />;
+    case 'ujaan':
+      return <UjaanInstrument />;
+    case 'vellum':
+      return <VellumInstrument />;
+    case 'living-sylhet-studio':
+      return (
+        <div className="min-h-[520px] lg:min-h-[600px] border border-[var(--border-neutral)] flex flex-col">
+          <StudioHeroPortal />
+        </div>
+      );
+    default:
+      return <ProjectVisualHeader slug={slug} />;
+  }
+}
+
 export default function ProjectCaseStudyPage({
   params,
 }: {
@@ -55,88 +81,84 @@ export default function ProjectCaseStudyPage({
       : null;
 
   return (
-    <article className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 sm:pt-14 pb-16">
-      <Link
-        href="/work"
-        className="inline-flex min-h-[44px] items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)] transition-colors duration-150 hover:text-[var(--ink-primary)]"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>Work</span>
-      </Link>
+    <article className="w-full max-w-[1680px] mx-auto px-6 lg:px-10">
+      {/* Asymmetric Case Study Header */}
+      <header className="grid grid-cols-1 lg:grid-cols-12 border-b border-[var(--border-neutral)]">
+        <div className="lg:col-span-7 lg:border-r border-[var(--border-neutral)] py-10 lg:py-14 lg:pr-10 space-y-5">
+          <Link
+            href="/work"
+            className="inline-flex min-h-[44px] items-center gap-2 font-mono text-xs text-[var(--ink-secondary)] hover-ink"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Back to Work</span>
+          </Link>
 
-      {/* Case Study Header */}
-      <header className="mt-4">
-        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-[var(--ink-secondary)] tabular-nums">
-          <span>{project.index}</span>
-          <span aria-hidden="true">·</span>
-          <span className="uppercase">{project.category}</span>
-          {project.subtitle && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{project.subtitle}</span>
-            </>
+          <h1 className="editorial-display text-[var(--ink-primary)]">
+            {project.title}
+          </h1>
+
+          <p className="max-w-[56ch] text-base lg:text-lg leading-[1.62] text-[var(--ink-secondary)]">
+            {project.tagline}
+          </p>
+
+          {(project.context || (project.team && project.team.length > 0)) && (
+            <div className="pt-2 flex flex-wrap items-center gap-x-6 gap-y-1 font-mono text-xs text-[var(--ink-secondary)]">
+              {project.context && <span>{project.context}</span>}
+              {project.team && project.team.length > 0 && (
+                <span>Team: {project.team.join(', ')}</span>
+              )}
+            </div>
           )}
         </div>
 
-        <h1 className="mt-3 text-3xl sm:text-[2.75rem] font-semibold tracking-[-0.025em] leading-[1.12] text-[var(--ink-primary)]">
-          {project.title}
-        </h1>
-
-        <p className="mt-4 max-w-3xl text-base sm:text-lg leading-[1.6] text-[var(--ink-secondary)]">
-          {project.tagline}
-        </p>
-
-        {/* 4-Column Metadata Rail */}
-        <dl className="mt-8 grid grid-cols-2 gap-4 rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-5 sm:grid-cols-4 sm:gap-6">
-          <div>
-            <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
+        <dl className="lg:col-span-5 grid grid-cols-2 border-t lg:border-t-0 border-[var(--border-neutral)]">
+          <div className="p-6 lg:p-8 border-r border-b border-[var(--border-neutral)] flex flex-col justify-between">
+            <dt className="font-mono text-xs text-[var(--ink-secondary)]">
               Role
             </dt>
-            <dd className="mt-1.5 text-sm font-medium text-[var(--ink-primary)]">
+            <dd className="mt-3 text-sm font-medium text-[var(--ink-primary)]">
               {project.role}
             </dd>
           </div>
 
-          <div>
-            <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
+          <div className="p-6 lg:p-8 border-b border-[var(--border-neutral)] flex flex-col justify-between">
+            <dt className="font-mono text-xs text-[var(--ink-secondary)]">
               Year
             </dt>
-            <dd className="mt-1.5 font-mono text-sm font-medium text-[var(--ink-primary)] tabular-nums">
+            <dd className="mt-3 font-mono text-sm font-medium text-[var(--ink-primary)] tabular-nums">
               {project.year}
             </dd>
           </div>
 
-          <div>
-            <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
+          <div className="p-6 lg:p-8 border-r border-[var(--border-neutral)] flex flex-col justify-between">
+            <dt className="font-mono text-xs text-[var(--ink-secondary)]">
               Status
             </dt>
-            <dd className="mt-1.5 text-sm font-medium text-[var(--ink-primary)]">
+            <dd className="mt-3 text-sm font-medium text-[var(--ink-primary)]">
               {STATUS_LABELS[project.status] ?? project.status}
             </dd>
           </div>
 
-          <div>
-            <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-              {project.links.live || project.links.github ? 'Links' : 'Primary Stack'}
+          <div className="p-6 lg:p-8 flex flex-col justify-between">
+            <dt className="font-mono text-xs text-[var(--ink-secondary)]">
+              {project.links.live || project.links.github ? 'Access' : 'Primary Stack'}
             </dt>
-            <dd className="mt-1.5 text-sm font-medium text-[var(--ink-primary)]">
+            <dd className="mt-3 text-sm font-medium text-[var(--ink-primary)]">
               {project.links.live ? (
                 <Link
                   href={project.links.live}
-                  className="inline-flex items-center gap-1 text-[var(--accent)] hover:underline"
+                  className="text-[var(--accent)] underline underline-offset-4 hover:text-[var(--accent-hover)]"
                 >
-                  <span>Open Live</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  Open Live Studio
                 </Link>
               ) : project.links.github ? (
                 <a
                   href={project.links.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[var(--accent)] hover:underline"
+                  className="text-[var(--accent)] underline underline-offset-4 hover:text-[var(--accent-hover)]"
                 >
-                  <span>Repository</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  View Repository
                 </a>
               ) : (
                 <span>{project.stack.slice(0, 2).join(', ')}</span>
@@ -144,89 +166,96 @@ export default function ProjectCaseStudyPage({
             </dd>
           </div>
         </dl>
-
-        {(project.context || (project.team && project.team.length > 0)) && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--ink-secondary)]">
-            {project.context && (
-              <span className="font-mono">{project.context}</span>
-            )}
-            {project.team && project.team.length > 0 && (
-              <span>Team: {project.team.join(', ')}</span>
-            )}
-          </div>
-        )}
       </header>
 
-      {/* Full-Width Visual Preview */}
-      <div className="mt-8">
-        <ProjectVisualHeader slug={project.slug} />
-      </div>
+      {/* Full-Width Interactive Instrument Stage */}
+      <section
+        aria-label={`${project.title} interactive preview`}
+        className="py-10 lg:py-14 border-b border-[var(--border-neutral)]"
+      >
+        {renderProjectInstrument(project.slug)}
+      </section>
 
-      {/* Architectural Specs Strip */}
-      {project.specs.length > 0 && (
-        <section aria-label="Technical specifications" className="mt-8">
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {project.specs.map((spec) => (
-              <div
-                key={spec.label}
-                className="rounded-xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] px-4 py-3.5"
-              >
-                <dt className="font-mono text-[11px] uppercase tracking-[0.05em] text-[var(--ink-secondary)]">
-                  {spec.label}
-                </dt>
-                <dd className="mt-1 font-mono text-xs sm:text-[13px] font-medium text-[var(--ink-primary)] tabular-nums">
-                  {spec.value}
-                </dd>
+      {/* Asymmetric Case Study Body */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-[var(--border-neutral)]">
+        {/* Sticky Left Technical Specifications & Stack Rail */}
+        <aside className="lg:col-span-4 lg:border-r border-[var(--border-neutral)] py-12 lg:py-16 lg:pr-10 border-b lg:border-b-0">
+          <div className="lg:sticky lg:top-20 lg:self-start space-y-10">
+            {project.specs.length > 0 && (
+              <section aria-label="Technical specifications" className="space-y-4">
+                <h2 className="font-serif font-normal text-[28px] leading-[1.1] text-[var(--ink-primary)]">
+                  Specifications
+                </h2>
+                <dl className="divide-y divide-[var(--border-neutral)] border-t border-b border-[var(--border-neutral)]">
+                  {project.specs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="py-3.5 flex items-baseline justify-between gap-4"
+                    >
+                      <dt className="font-mono text-xs text-[var(--ink-secondary)]">
+                        {spec.label}
+                      </dt>
+                      <dd className="font-mono text-xs text-right text-[var(--ink-primary)] tabular-nums">
+                        {spec.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
+            <section aria-label="Technology stack" className="space-y-4">
+              <h2 className="font-serif font-normal text-[28px] leading-[1.1] text-[var(--ink-primary)]">
+                Technology Stack
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {project.stack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded border border-[var(--border-neutral)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-xs text-[var(--ink-primary)]"
+                  >
+                    {tech}
+                  </span>
+                ))}
               </div>
-            ))}
-          </dl>
-        </section>
-      )}
+            </section>
+          </div>
+        </aside>
 
-      {/* Case Study Prose */}
-      <div className="prose-obsidian mt-12">
-        <h2>Problem</h2>
-        <p>{project.problem}</p>
+        {/* Right 8-Column Case Study Prose */}
+        <div className="lg:col-span-8 py-12 lg:py-16 lg:pl-12">
+          <div className="prose-obsidian">
+            <h2 className="!mt-0">Problem</h2>
+            <p>{project.problem}</p>
 
-        <h2>Architecture</h2>
-        <p>{project.architecture}</p>
+            <h2>Architecture</h2>
+            <p>{project.architecture}</p>
 
-        <h2>Engineering &amp; Craft Highlights</h2>
-        <ul>
-          {project.craftHighlights.map((highlight) => (
-            <li key={highlight}>{highlight}</li>
-          ))}
-        </ul>
-
-        <h2>Technology Stack</h2>
-        <div className="not-prose mt-4 flex flex-wrap gap-2">
-          {project.stack.map((tech) => (
-            <span
-              key={tech}
-              className="rounded-lg border border-[var(--border-neutral)] bg-[var(--bg-surface)] px-3 py-1.5 font-mono text-xs text-[var(--ink-primary)]"
-            >
-              {tech}
-            </span>
-          ))}
+            <h2>Engineering &amp; Craft Highlights</h2>
+            <ul>
+              {project.craftHighlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* Prev / Next Navigation */}
       <nav
         aria-label="Project navigation"
-        className="mt-16 grid grid-cols-1 gap-4 border-t border-[var(--border-neutral)] pt-8 sm:grid-cols-2"
+        className="grid grid-cols-1 sm:grid-cols-2"
       >
-        <div>
+        <div className="sm:border-r border-[var(--border-neutral)]">
           {prevProject && (
             <Link
               href={`/work/${prevProject.slug}`}
-              className="group flex flex-col rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-5 transition-colors duration-150 hover:border-[var(--border-hover)]"
+              className="group flex flex-col py-10 sm:pr-8 hover-surface transition-colors duration-[var(--dur-fast)] ease-obsidian"
             >
-              <span className="inline-flex items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)]">
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Previous · {prevProject.index}</span>
+              <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                Previous case study
               </span>
-              <span className="mt-2 text-base font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-150">
+              <span className="mt-2 font-serif font-normal text-[28px] lg:text-[34px] leading-[1.08] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {prevProject.title}
               </span>
             </Link>
@@ -237,13 +266,12 @@ export default function ProjectCaseStudyPage({
           {nextProject && (
             <Link
               href={`/work/${nextProject.slug}`}
-              className="group flex flex-col items-end rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-5 text-right transition-colors duration-150 hover:border-[var(--border-hover)]"
+              className="group flex flex-col sm:items-end py-10 sm:pl-8 sm:text-right border-t sm:border-t-0 border-[var(--border-neutral)] hover-surface transition-colors duration-[var(--dur-fast)] ease-obsidian"
             >
-              <span className="inline-flex items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)]">
-                <span>Next · {nextProject.index}</span>
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                Next case study
               </span>
-              <span className="mt-2 text-base font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-150">
+              <span className="mt-2 font-serif font-normal text-[28px] lg:text-[34px] leading-[1.08] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {nextProject.title}
               </span>
             </Link>

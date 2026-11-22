@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
-import { ESSAYS } from '@/content/writing';
+import { getPublishedEssays } from '@/content/writing';
 import { formatDate } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -11,69 +10,75 @@ export const metadata: Metadata = {
 };
 
 export default function WritingPage() {
+  const essays = getPublishedEssays();
+
   return (
-    <div className="mx-auto max-w-5xl px-5 sm:px-8 pt-12 sm:pt-16 pb-16">
-      <header className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-          Engineering Notes
-        </p>
-        <h1 className="mt-2 text-3xl sm:text-[2.5rem] font-semibold tracking-[-0.025em] leading-[1.12] text-[var(--ink-primary)]">
-          Writing
-        </h1>
-        <p className="mt-4 text-base leading-[1.65] text-[var(--ink-secondary)]">
-          Long-form technical notes documenting architectural tradeoffs,
-          exact-precision financial math, and frontend performance boundaries
-          from shipped projects.
-        </p>
-      </header>
-
-      <section aria-label="Published essays" className="mt-10 space-y-4">
-        {ESSAYS.map((essay) => (
-          <Link
-            key={essay.slug}
-            href={`/writing/${essay.slug}`}
-            className="group block rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-6 sm:p-7 transition-colors duration-150 hover:border-[var(--border-hover)]"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-[var(--ink-secondary)] tabular-nums">
-                <time dateTime={essay.publishedAt}>
-                  {formatDate(essay.publishedAt)}
-                </time>
-                <span aria-hidden="true">·</span>
-                <span>{essay.readingTimeMinutes} min read</span>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                {essay.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-md bg-[var(--bg-track)] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.04em] text-[var(--ink-secondary)]"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+    <div className="w-full max-w-[1680px] mx-auto px-6 lg:px-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        {/* Sticky Left Header Rail */}
+        <header className="lg:col-span-4 lg:border-r border-[var(--border-neutral)] py-12 lg:py-16 lg:pr-10 border-b lg:border-b-0">
+          <div className="lg:sticky lg:top-20 lg:self-start space-y-5">
+            <h1 className="editorial-display text-[var(--ink-primary)]">
+              Writing
+            </h1>
+            <p className="text-[15px] leading-[1.68] text-[var(--ink-secondary)]">
+              Long-form technical notes documenting architectural tradeoffs,
+              exact-precision financial math, and frontend performance
+              boundaries from shipped projects.
+            </p>
+            <div className="pt-4 border-t border-[var(--border-neutral)] flex items-center justify-between font-mono text-xs text-[var(--ink-secondary)] tabular-nums">
+              <span>Published notes</span>
+              <span>{essays.length} essays</span>
             </div>
+          </div>
+        </header>
 
-            <div className="mt-3 flex items-start justify-between gap-4">
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] leading-[1.25] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-150">
+        {/* Right 8-Column Tabular Essay Ledger */}
+        <section
+          aria-label="Published essays"
+          className="lg:col-span-8 divide-y divide-[var(--border-neutral)]"
+        >
+          {essays.map((essay) => (
+            <Link
+              key={essay.slug}
+              href={`/writing/${essay.slug}`}
+              className="group block py-10 lg:px-10 hover-surface transition-colors duration-[var(--dur-fast)] ease-obsidian"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-[var(--ink-secondary)] tabular-nums">
+                <div className="flex items-center gap-4">
+                  <time dateTime={essay.publishedAt}>
+                    {formatDate(essay.publishedAt)}
+                  </time>
+                  <span>{essay.readingTimeMinutes} min read</span>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {essay.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded border border-[var(--border-neutral)] bg-[var(--bg-surface)] px-2 py-0.5 text-[11px] text-[var(--ink-secondary)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <h2 className="mt-4 font-serif font-normal text-[32px] lg:text-[40px] leading-[1.06] tracking-[-0.02em] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {essay.title}
               </h2>
-              <ArrowUpRight
-                className="mt-1 h-4 w-4 shrink-0 text-[var(--ink-secondary)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[var(--ink-primary)]"
-                aria-hidden="true"
-              />
-            </div>
 
-            <p className="mt-2 text-sm font-medium text-[var(--ink-primary)]">
-              {essay.subtitle}
-            </p>
-            <p className="mt-2 text-sm leading-[1.65] text-[var(--ink-secondary)]">
-              {essay.excerpt}
-            </p>
-          </Link>
-        ))}
-      </section>
+              <p className="mt-3 text-sm lg:text-[15px] font-medium text-[var(--ink-primary)]">
+                {essay.subtitle}
+              </p>
+
+              <p className="mt-2 max-w-[64ch] text-sm leading-[1.66] text-[var(--ink-secondary)]">
+                {essay.excerpt}
+              </p>
+            </Link>
+          ))}
+        </section>
+      </div>
     </div>
   );
 }

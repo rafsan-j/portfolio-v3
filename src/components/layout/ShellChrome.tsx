@@ -21,12 +21,12 @@ export function ShellChrome({ children, footer }: ShellChromeProps) {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[var(--z-toast)] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--accent)] focus:text-[var(--ink-on-accent)] focus:text-sm focus:font-medium"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[var(--z-toast)] focus:px-4 focus:py-2 focus:rounded-md focus:bg-[var(--accent)] focus:text-[var(--ink-on-accent)] focus:text-sm focus:font-medium"
       >
         Skip to main content
       </a>
       <TopStatusBar />
-      <main id="main-content" className="min-h-screen pb-16 sm:pb-24">
+      <main id="main-content" className="min-h-screen">
         {children}
       </main>
       {footer}

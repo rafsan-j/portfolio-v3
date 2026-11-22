@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ESSAYS, getEssayBySlug } from '@/content/writing';
 import type { EssayBlock } from '@/content/types';
 import { formatDate } from '@/lib/utils';
@@ -61,13 +61,13 @@ function renderEssayBlock(block: EssayBlock, index: number) {
       return (
         <div key={index} className="not-prose my-7">
           {block.language && (
-            <div className="flex items-center justify-between rounded-t-xl border border-b-0 border-[var(--border-neutral)] bg-[var(--bg-track)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.05em] text-[var(--ink-secondary)]">
+            <div className="flex items-center justify-between rounded-t-md border border-b-0 border-[var(--border-neutral)] bg-[var(--bg-track)] px-4 py-2 font-mono text-[11px] text-[var(--ink-secondary)]">
               <span>{block.language}</span>
             </div>
           )}
           <pre
             className={`overflow-x-auto border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-4 sm:p-5 font-mono text-[13px] leading-[1.65] text-[var(--ink-primary)] ${
-              block.language ? 'rounded-b-xl' : 'rounded-xl'
+              block.language ? 'rounded-b-md' : 'rounded-md'
             }`}
           >
             <code>{String(block.content)}</code>
@@ -93,63 +93,76 @@ export default function EssayReaderPage({
     currentIndex < ESSAYS.length - 1 ? ESSAYS[currentIndex + 1] : null;
 
   return (
-    <article className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 sm:pt-14 pb-16">
-      <Link
-        href="/writing"
-        className="inline-flex min-h-[44px] items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)] transition-colors duration-150 hover:text-[var(--ink-primary)]"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>Writing</span>
-      </Link>
+    <article className="w-full max-w-[1680px] mx-auto px-6 lg:px-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-[var(--border-neutral)]">
+        {/* Sticky Left Metadata Rail */}
+        <aside className="lg:col-span-4 lg:border-r border-[var(--border-neutral)] py-10 lg:py-16 lg:pr-10 border-b lg:border-b-0">
+          <div className="lg:sticky lg:top-20 lg:self-start space-y-6">
+            <Link
+              href="/writing"
+              className="inline-flex min-h-[44px] items-center gap-2 font-mono text-xs text-[var(--ink-secondary)] hover-ink"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Back to Writing</span>
+            </Link>
 
-      <header className="mt-4 max-w-[68ch] border-b border-[var(--border-neutral)] pb-8">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-[var(--ink-secondary)] tabular-nums">
-          <time dateTime={essay.publishedAt}>
-            {formatDate(essay.publishedAt)}
-          </time>
-          <span aria-hidden="true">·</span>
-          <span>{essay.readingTimeMinutes} min read</span>
-          <span aria-hidden="true">·</span>
-          <div className="flex flex-wrap gap-1.5">
-            {essay.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-md bg-[var(--bg-track)] px-2 py-0.5 text-[11px] uppercase tracking-[0.04em] text-[var(--ink-secondary)]"
-              >
-                {tag}
-              </span>
-            ))}
+            <dl className="divide-y divide-[var(--border-neutral)] border-t border-b border-[var(--border-neutral)] font-mono text-xs">
+              <div className="py-3.5 flex items-center justify-between gap-4">
+                <dt className="text-[var(--ink-secondary)]">Published</dt>
+                <dd className="text-[var(--ink-primary)] tabular-nums">
+                  <time dateTime={essay.publishedAt}>
+                    {formatDate(essay.publishedAt)}
+                  </time>
+                </dd>
+              </div>
+              <div className="py-3.5 flex items-center justify-between gap-4">
+                <dt className="text-[var(--ink-secondary)]">Reading time</dt>
+                <dd className="text-[var(--ink-primary)] tabular-nums">
+                  {essay.readingTimeMinutes} min
+                </dd>
+              </div>
+              <div className="py-3.5 flex items-center justify-between gap-4">
+                <dt className="text-[var(--ink-secondary)]">Topics</dt>
+                <dd className="text-[var(--ink-primary)]">
+                  {essay.tags.join(', ')}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </aside>
+
+        {/* Right 8-Column Essay Reading Surface */}
+        <div className="lg:col-span-8 py-10 lg:py-16 lg:pl-12">
+          <header className="max-w-[68ch] pb-10 border-b border-[var(--border-neutral)]">
+            <h1 className="font-serif font-normal text-[40px] lg:text-[56px] leading-[1.0] tracking-[-0.02em] text-[var(--ink-primary)]">
+              {essay.title}
+            </h1>
+            <p className="mt-5 text-base lg:text-lg leading-[1.6] text-[var(--ink-secondary)]">
+              {essay.subtitle}
+            </p>
+          </header>
+
+          <div className="prose-obsidian mt-10">
+            {essay.blocks.map((block, index) => renderEssayBlock(block, index))}
           </div>
         </div>
-
-        <h1 className="mt-4 text-3xl sm:text-[2.5rem] font-semibold tracking-[-0.025em] leading-[1.14] text-[var(--ink-primary)]">
-          {essay.title}
-        </h1>
-
-        <p className="mt-4 text-base sm:text-lg leading-[1.6] text-[var(--ink-secondary)]">
-          {essay.subtitle}
-        </p>
-      </header>
-
-      <div className="prose-obsidian mt-10">
-        {essay.blocks.map((block, index) => renderEssayBlock(block, index))}
       </div>
 
+      {/* Prev / Next Navigation */}
       <nav
         aria-label="Essay navigation"
-        className="mt-16 grid max-w-[68ch] grid-cols-1 gap-4 border-t border-[var(--border-neutral)] pt-8 sm:grid-cols-2"
+        className="grid grid-cols-1 sm:grid-cols-2"
       >
-        <div>
+        <div className="sm:border-r border-[var(--border-neutral)]">
           {prevEssay && (
             <Link
               href={`/writing/${prevEssay.slug}`}
-              className="group flex flex-col rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-5 transition-colors duration-150 hover:border-[var(--border-hover)]"
+              className="group flex flex-col py-10 sm:pr-8 hover-surface transition-colors duration-[var(--dur-fast)] ease-obsidian"
             >
-              <span className="inline-flex items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)]">
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Previous</span>
+              <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                Previous essay
               </span>
-              <span className="mt-2 text-sm font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-150">
+              <span className="mt-2 font-serif font-normal text-[26px] lg:text-[30px] leading-[1.1] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {prevEssay.title}
               </span>
             </Link>
@@ -160,13 +173,12 @@ export default function EssayReaderPage({
           {nextEssay && (
             <Link
               href={`/writing/${nextEssay.slug}`}
-              className="group flex flex-col items-end rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-5 text-right transition-colors duration-150 hover:border-[var(--border-hover)]"
+              className="group flex flex-col sm:items-end py-10 sm:pl-8 sm:text-right border-t sm:border-t-0 border-[var(--border-neutral)] hover-surface transition-colors duration-[var(--dur-fast)] ease-obsidian"
             >
-              <span className="inline-flex items-center gap-1.5 font-mono text-xs text-[var(--ink-secondary)]">
-                <span>Next</span>
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                Next essay
               </span>
-              <span className="mt-2 text-sm font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-150">
+              <span className="mt-2 font-serif font-normal text-[26px] lg:text-[30px] leading-[1.1] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {nextEssay.title}
               </span>
             </Link>
