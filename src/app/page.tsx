@@ -8,7 +8,7 @@ import { NavBar }          from '@/components/layout/NavBar';
 import { WebGLBackground } from '@/components/sections/WebGLBackground';
 import { FALLBACK_PROJECTS } from '@/lib/fallbackData';
 
-const CyberLabGame = dynamic(() => import('@/components/sections/CyberLabGame'), {
+const Studio3DLab = dynamic(() => import('@/components/sections/Studio3DLab'), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen flex items-center justify-center bg-[#03060c] text-[#00d4ff] font-mono text-xs tracking-widest">
@@ -848,7 +848,7 @@ export default function HomePage() {
       {mode === 'game' && (
         <>
           <NavBar />
-          <CyberLabGame onOpenAI={() => setAiOpen(true)} />
+          <Studio3DLab onOpenAI={() => setAiOpen(true)} />
         </>
       )}
     </>
