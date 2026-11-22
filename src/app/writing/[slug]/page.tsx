@@ -61,7 +61,7 @@ function renderEssayBlock(block: EssayBlock, index: number) {
       return (
         <div key={index} className="not-prose my-7">
           {block.language && (
-            <div className="flex items-center justify-between rounded-t-md border border-b-0 border-[var(--border-neutral)] bg-[var(--bg-track)] px-4 py-2 font-mono text-[11px] text-[var(--ink-secondary)]">
+            <div className="flex items-center justify-between rounded-t-md border border-b-0 border-[var(--border-neutral)] bg-[var(--bg-track)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-secondary)]">
               <span>{block.language}</span>
             </div>
           )}
@@ -93,14 +93,14 @@ export default function EssayReaderPage({
     currentIndex < ESSAYS.length - 1 ? ESSAYS[currentIndex + 1] : null;
 
   return (
-    <article className="w-full max-w-[1680px] mx-auto px-6 lg:px-10">
+    <article className="pt-16 w-full max-w-[1680px] mx-auto px-6 lg:px-10">
       <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-[var(--border-neutral)]">
         {/* Sticky Left Metadata Rail */}
         <aside className="lg:col-span-4 lg:border-r border-[var(--border-neutral)] py-10 lg:py-16 lg:pr-10 border-b lg:border-b-0">
-          <div className="lg:sticky lg:top-20 lg:self-start space-y-6">
+          <div className="lg:sticky lg:top-24 lg:self-start space-y-6">
             <Link
               href="/writing"
-              className="inline-flex min-h-[44px] items-center gap-2 font-mono text-xs text-[var(--ink-secondary)] hover-ink"
+              className="tactile-press inline-flex min-h-[44px] items-center gap-2 font-mono text-xs text-[var(--ink-secondary)] hover-ink"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Back to Writing</span>
@@ -109,7 +109,7 @@ export default function EssayReaderPage({
             <dl className="divide-y divide-[var(--border-neutral)] border-t border-b border-[var(--border-neutral)] font-mono text-xs">
               <div className="py-3.5 flex items-center justify-between gap-4">
                 <dt className="text-[var(--ink-secondary)]">Published</dt>
-                <dd className="text-[var(--ink-primary)] tabular-nums">
+                <dd className="text-[var(--ink-primary)] tnum">
                   <time dateTime={essay.publishedAt}>
                     {formatDate(essay.publishedAt)}
                   </time>
@@ -117,7 +117,7 @@ export default function EssayReaderPage({
               </div>
               <div className="py-3.5 flex items-center justify-between gap-4">
                 <dt className="text-[var(--ink-secondary)]">Reading time</dt>
-                <dd className="text-[var(--ink-primary)] tabular-nums">
+                <dd className="text-[var(--ink-primary)] tnum">
                   {essay.readingTimeMinutes} min
                 </dd>
               </div>
@@ -134,10 +134,13 @@ export default function EssayReaderPage({
         {/* Right 8-Column Essay Reading Surface */}
         <div className="lg:col-span-8 py-10 lg:py-16 lg:pl-12">
           <header className="max-w-[68ch] pb-10 border-b border-[var(--border-neutral)]">
-            <h1 className="font-serif font-normal text-[40px] lg:text-[56px] leading-[1.0] tracking-[-0.02em] text-[var(--ink-primary)]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
+              Engineering Note
+            </p>
+            <h1 className="font-serif font-normal text-[42px] lg:text-[60px] leading-[0.98] tracking-[-0.02em] text-[var(--ink-primary)]">
               {essay.title}
             </h1>
-            <p className="mt-5 text-base lg:text-lg leading-[1.6] text-[var(--ink-secondary)]">
+            <p className="mt-5 text-base lg:text-lg leading-[1.64] text-[var(--ink-secondary)]">
               {essay.subtitle}
             </p>
           </header>
@@ -162,7 +165,7 @@ export default function EssayReaderPage({
               <span className="font-mono text-xs text-[var(--ink-secondary)]">
                 Previous essay
               </span>
-              <span className="mt-2 font-serif font-normal text-[26px] lg:text-[30px] leading-[1.1] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
+              <span className="mt-2 font-serif font-normal text-[28px] lg:text-[32px] leading-[1.08] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {prevEssay.title}
               </span>
             </Link>
@@ -178,7 +181,7 @@ export default function EssayReaderPage({
               <span className="font-mono text-xs text-[var(--ink-secondary)]">
                 Next essay
               </span>
-              <span className="mt-2 font-serif font-normal text-[26px] lg:text-[30px] leading-[1.1] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
+              <span className="mt-2 font-serif font-normal text-[28px] lg:text-[32px] leading-[1.08] text-[var(--ink-primary)] group-hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)] ease-obsidian">
                 {nextEssay.title}
               </span>
             </Link>

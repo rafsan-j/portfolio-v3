@@ -5,49 +5,49 @@
 :root {
   color-scheme: dark;
 
-  /* Surfaces & Canvas (Obsidian Matte Dark Default) */
-  --bg-canvas: #0B0E11;
-  --bg-canvas-translucent: rgba(11, 14, 17, 0.88);
-  --bg-surface: #151921;
-  --bg-surface-translucent: rgba(21, 25, 33, 0.88);
-  --bg-track: #232934;
-  --bg-scrim: rgba(11, 14, 17, 0.72);
+  /* Surfaces & Canvas (Sylhet Monograph Nocturnal Slate Default) */
+  --bg-canvas: #0E100F;
+  --bg-canvas-translucent: rgba(14, 16, 15, 0.78);
+  --bg-surface: #151817;
+  --bg-surface-translucent: rgba(21, 24, 23, 0.88);
+  --bg-track: #1F2321;
+  --bg-scrim: rgba(14, 16, 15, 0.76);
 
-  /* Ink Hierarchy */
-  --ink-primary: #EAECEF;
-  --ink-secondary: #8A94A6;
-  --ink-on-accent: #0B0E11;
+  /* Ink Hierarchy (Warm Vellum & Muted Stone) */
+  --ink-primary: #EDE7DA;
+  --ink-secondary: #9A9891;
+  --ink-on-accent: #0E100F;
 
-  /* Strictly Neutral Borders (Never Accent on Resting Cards/Tabs) */
-  --border-neutral: #232934;
-  --border-hover: #333C4D;
-  --border-interactive: #525E73;
+  /* Strictly Neutral Hairlines */
+  --border-neutral: #262A28;
+  --border-hover: #3A403D;
+  --border-interactive: #58605C;
 
-  /* Selective Active Accent */
-  --accent: #6BD0C2;
-  --accent-hover: #7ED9CC;
-  --accent-tint: rgba(107, 208, 194, 0.14);
+  /* Tungsten Lamp Accent */
+  --accent: #D99B52;
+  --accent-hover: #E6AE68;
+  --accent-tint: rgba(217, 155, 82, 0.14);
 
   /* 64-District Bangladesh Map Tokens */
-  --map-land: #151921;
-  --map-land-hover: #1E2530;
-  --map-land-active: #1E2A30;
-  --map-stroke: #2A3240;
+  --map-land: #151817;
+  --map-land-hover: #1E2220;
+  --map-land-active: #27221B;
+  --map-stroke: #2B302E;
 
   /* Anchor District Accent Tokens */
-  --anchor-sylhet: #6BD0C2;
-  --anchor-dinajpur: #F59E0B;
-  --anchor-rajshahi: #7AA2F7;
+  --anchor-sylhet: #D99B52;
+  --anchor-dinajpur: #C8845C;
+  --anchor-rajshahi: #7E9AA6;
 
-  /* Matte Elevation (Zero Neon Glow) */
-  --shadow-dock: 0 12px 32px rgba(0, 0, 0, 0.45);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
+  /* Matte Elevation */
+  --shadow-dock: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.65);
 
-  /* Motion Tokens (Emil Kowalski crisp ease-out) */
+  /* Motion Tokens */
   --ease-obsidian: cubic-bezier(0.23, 1, 0.32, 1);
-  --dur-fast: 140ms;
-  --dur-base: 220ms;
-  --dur-slow: 280ms;
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 360ms;
 
   /* Z-Index Scale */
   --z-base: 0;
@@ -62,43 +62,43 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Surfaces & Canvas (Cool-Neutral Light) */
-  --bg-canvas: #F2F5F7;
-  --bg-canvas-translucent: rgba(242, 245, 247, 0.88);
-  --bg-surface: #FFFFFF;
-  --bg-surface-translucent: rgba(255, 255, 255, 0.88);
-  --bg-track: #E8ECEF;
-  --bg-scrim: rgba(15, 23, 32, 0.36);
+  /* Surfaces & Canvas (Warm Archival Vellum) */
+  --bg-canvas: #EDE7DA;
+  --bg-canvas-translucent: rgba(237, 231, 218, 0.86);
+  --bg-surface: #F6F3EC;
+  --bg-surface-translucent: rgba(246, 243, 236, 0.9);
+  --bg-track: #E1D9C8;
+  --bg-scrim: rgba(20, 22, 21, 0.4);
 
   /* Ink Hierarchy */
-  --ink-primary: #0F1720;
-  --ink-secondary: #5C6672;
-  --ink-on-accent: #FFFFFF;
+  --ink-primary: #141615;
+  --ink-secondary: #5C5952;
+  --ink-on-accent: #F6F3EC;
 
-  /* Strictly Neutral Borders */
-  --border-neutral: #E2E8F0;
-  --border-hover: #CBD5E1;
-  --border-interactive: #7B8794;
+  /* Strictly Neutral Hairlines */
+  --border-neutral: #D4CBB9;
+  --border-hover: #B9AE9A;
+  --border-interactive: #7A7468;
 
-  /* Selective Deep Teal Accent (WCAG AA/AAA Safe) */
-  --accent: #0F766E;
-  --accent-hover: #115E59;
-  --accent-tint: rgba(15, 118, 110, 0.12);
+  /* Archival Oxide Accent */
+  --accent: #8B5E46;
+  --accent-hover: #734B36;
+  --accent-tint: rgba(139, 94, 70, 0.12);
 
   /* 64-District Bangladesh Map Tokens */
-  --map-land: #FFFFFF;
-  --map-land-hover: #E8ECEF;
-  --map-land-active: #E2EFEE;
-  --map-stroke: #CBD5E1;
+  --map-land: #F6F3EC;
+  --map-land-hover: #E5DEC9;
+  --map-land-active: #E8DCD2;
+  --map-stroke: #C8BFA9;
 
   /* Anchor District Accent Tokens (Light-Safe) */
-  --anchor-sylhet: #0F766E;
-  --anchor-dinajpur: #B45309;
-  --anchor-rajshahi: #3B5BDB;
+  --anchor-sylhet: #8B5E46;
+  --anchor-dinajpur: #A0642A;
+  --anchor-rajshahi: #486578;
 
   /* Elevation */
-  --shadow-dock: 0 10px 28px rgba(15, 23, 32, 0.08);
-  --shadow-modal: 0 24px 60px rgba(15, 23, 32, 0.14);
+  --shadow-dock: 0 10px 28px rgba(20, 22, 21, 0.1);
+  --shadow-modal: 0 24px 60px rgba(20, 22, 21, 0.16);
 }
 
 @layer base {
@@ -111,7 +111,7 @@
   body {
     background-color: var(--bg-canvas);
     color: var(--ink-primary);
-    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-manrope), sans-serif;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -138,18 +138,54 @@
 
 @layer utilities {
   .editorial-display {
-    font-family: var(--font-instrument-serif), Georgia, serif;
+    font-family: var(--font-cormorant), Georgia, serif;
     font-weight: 400;
-    font-size: clamp(52px, 5.6vw, 96px);
+    font-size: clamp(48px, 5.6vw, 94px);
     line-height: 0.94;
     letter-spacing: -0.02em;
   }
 
   .editorial-quote {
-    font-family: var(--font-instrument-serif), Georgia, serif;
+    font-family: var(--font-cormorant), Georgia, serif;
     font-style: italic;
     font-weight: 400;
-    line-height: 1.25;
+    line-height: 1.2;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .clip-reveal-mask {
+    overflow: hidden;
+    display: block;
+  }
+
+  .clip-reveal-inner {
+    display: block;
+    transform: translate3d(0, 108%, 0);
+    opacity: 0;
+    transition:
+      transform 760ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 540ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
+  .clip-reveal-inner[data-revealed="true"],
+  .clip-reveal-mask[data-revealed="true"] .clip-reveal-inner,
+  .is-visible .clip-reveal-inner {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+
+  .tactile-press {
+    transition-property: transform, background-color, border-color, color, opacity;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--ease-obsidian);
+  }
+
+  .tactile-press:active {
+    transform: scale(0.975);
   }
 
   .hover-surface,
@@ -180,18 +216,18 @@
   }
 }
 
-/* Editorial Essay Prose Protection */
+/* Editorial Monograph Prose Protection */
 .prose-obsidian {
   max-width: 68ch;
   color: var(--ink-primary);
-  font-size: 1rem;
-  line-height: 1.72;
+  font-size: 1.03125rem;
+  line-height: 1.76;
 }
 
 .prose-obsidian h1 {
-  font-family: var(--font-instrument-serif), Georgia, serif;
-  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
-  line-height: 0.98;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(2.6rem, 4.8vw, 4rem);
+  line-height: 0.96;
   font-weight: 400;
   letter-spacing: -0.02em;
   color: var(--ink-primary);
@@ -200,21 +236,21 @@
 }
 
 .prose-obsidian h2 {
-  font-family: var(--font-instrument-serif), Georgia, serif;
-  font-size: clamp(1.75rem, 2.8vw, 2.25rem);
-  line-height: 1.12;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(1.85rem, 3vw, 2.5rem);
+  line-height: 1.08;
   font-weight: 400;
   letter-spacing: -0.015em;
   color: var(--ink-primary);
   margin-top: 2.75rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.9rem;
 }
 
 .prose-obsidian h3 {
   font-size: clamp(1.125rem, 2vw, 1.25rem);
   line-height: 1.35;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   color: var(--ink-primary);
   margin-top: 2rem;
   margin-bottom: 0.625rem;
@@ -222,18 +258,18 @@
 
 .prose-obsidian p {
   margin-top: 0;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.3rem;
   color: var(--ink-primary);
 }
 
 .prose-obsidian blockquote {
-  margin: 2rem 0;
+  margin: 2.25rem 0;
   padding: 0.5rem 0 0.5rem 1.5rem;
   border-left: 2px solid var(--accent);
-  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-family: var(--font-cormorant), Georgia, serif;
   font-style: italic;
-  font-size: 1.375rem;
-  line-height: 1.35;
+  font-size: 1.5rem;
+  line-height: 1.32;
   color: var(--ink-primary);
 }
 
@@ -252,7 +288,7 @@
 }
 
 .prose-obsidian li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
 }
 
 .prose-obsidian pre {
@@ -262,14 +298,14 @@
   background-color: var(--bg-surface);
   border: 1px solid var(--border-neutral);
   overflow-x: auto;
-  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--font-dm-mono), monospace;
   font-size: 0.8125rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--ink-primary);
 }
 
 .prose-obsidian code {
-  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--font-dm-mono), monospace;
   font-size: 0.875em;
 }
 
@@ -293,6 +329,11 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .clip-reveal-inner {
+    transform: none !important;
+    opacity: 1 !important;
   }
 
   *,
