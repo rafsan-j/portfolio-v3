@@ -13,7 +13,7 @@ interface ShellChromeProps {
 export function ShellChrome({ children, footer }: ShellChromeProps) {
   const pathname = usePathname();
 
-  if (pathname === '/studio') {
+  if (pathname === '/' || pathname === '/studio') {
     return <>{children}</>;
   }
 
