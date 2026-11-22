@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { ArrowUpRight, Clock, Mail } from 'lucide-react';
 import { PROFILE } from '@/content/profile';
 import { CopyEmailButton } from '@/components/CopyEmailButton';
 import { ContactForm } from '@/components/ContactForm';
@@ -12,100 +11,90 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="mx-auto max-w-5xl px-5 sm:px-8 pt-12 sm:pt-16 pb-16">
-      <header className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-          Contact · {PROFILE.location}
-        </p>
-        <h1 className="mt-2 text-3xl sm:text-[2.5rem] font-semibold tracking-[-0.025em] leading-[1.12] text-[var(--ink-primary)]">
-          Get in touch
-        </h1>
-        <p className="mt-4 text-base leading-[1.65] text-[var(--ink-secondary)]">
-          {PROFILE.contact.intro}
-        </p>
-      </header>
+    <div className="w-full max-w-[1680px] mx-auto px-6 lg:px-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        {/* Sticky Left Header & Direct Channels Rail */}
+        <aside className="lg:col-span-5 lg:border-r border-[var(--border-neutral)] py-12 lg:py-16 lg:pr-10 border-b lg:border-b-0">
+          <div className="lg:sticky lg:top-20 lg:self-start space-y-10">
+            <header className="space-y-4">
+              <h1 className="editorial-display text-[var(--ink-primary)]">
+                Get in touch
+              </h1>
+              <p className="max-w-[44ch] text-[15px] leading-[1.68] text-[var(--ink-secondary)]">
+                {PROFILE.contact.intro}
+              </p>
+            </header>
 
-      <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Direct Channels */}
-        <aside className="space-y-5 lg:col-span-5">
-          <div className="rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-6">
-            <p className="font-mono text-xs uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-              Direct Email
-            </p>
-            <a
-              href={PROFILE.links.email}
-              className="mt-2 inline-flex items-center gap-2 font-mono text-sm font-medium text-[var(--ink-primary)] transition-colors duration-150 hover:text-[var(--accent)] break-all"
-            >
-              <Mail
-                className="h-4 w-4 shrink-0 text-[var(--ink-secondary)]"
-                aria-hidden="true"
-              />
-              <span>{PROFILE.email}</span>
-            </a>
+            <div className="divide-y divide-[var(--border-neutral)] border-t border-b border-[var(--border-neutral)]">
+              <div className="py-5 space-y-3">
+                <p className="font-mono text-xs text-[var(--ink-secondary)]">
+                  Direct email
+                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <a
+                    href={PROFILE.links.email}
+                    className="font-mono text-sm text-[var(--ink-primary)] hover-accent break-all"
+                  >
+                    {PROFILE.email}
+                  </a>
+                  <CopyEmailButton />
+                </div>
+              </div>
 
-            <div className="mt-4">
-              <CopyEmailButton />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-6">
-            <p className="font-mono text-xs uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-              Profiles
-            </p>
-            <ul className="mt-3 space-y-2.5">
-              <li>
+              <div className="py-5 flex items-center justify-between gap-4">
+                <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                  GitHub
+                </span>
                 <a
                   href={PROFILE.links.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-[44px] w-full items-center justify-between rounded-xl border border-[var(--border-neutral)] bg-[var(--bg-canvas)] px-4 py-2.5 text-sm font-medium text-[var(--ink-primary)] transition-colors duration-150 hover:border-[var(--border-hover)]"
+                  className="font-mono text-sm text-[var(--ink-primary)] hover-accent"
                 >
-                  <span>GitHub · @rafsan-j</span>
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[var(--ink-secondary)]"
-                    aria-hidden="true"
-                  />
+                  @rafsan-j
                 </a>
-              </li>
-              <li>
+              </div>
+
+              <div className="py-5 flex items-center justify-between gap-4">
+                <span className="font-mono text-xs text-[var(--ink-secondary)]">
+                  LinkedIn
+                </span>
                 <a
                   href={PROFILE.links.linkedin}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-[44px] w-full items-center justify-between rounded-xl border border-[var(--border-neutral)] bg-[var(--bg-canvas)] px-4 py-2.5 text-sm font-medium text-[var(--ink-primary)] transition-colors duration-150 hover:border-[var(--border-hover)]"
+                  className="font-mono text-sm text-[var(--ink-primary)] hover-accent"
                 >
-                  <span>LinkedIn · rafsan-jani72</span>
-                  <ArrowUpRight
-                    className="h-4 w-4 text-[var(--ink-secondary)]"
-                    aria-hidden="true"
-                  />
+                  rafsan-jani72
                 </a>
-              </li>
-            </ul>
-          </div>
+              </div>
 
-          <div className="rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-6">
-            <p className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
-              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Timezone &amp; Availability</span>
-            </p>
-            <p className="mt-2.5 text-sm leading-[1.65] text-[var(--ink-secondary)]">
-              {PROFILE.contact.availability}
-            </p>
+              <div className="py-5 space-y-2">
+                <p className="font-mono text-xs text-[var(--ink-secondary)]">
+                  Availability
+                </p>
+                <p className="text-sm leading-[1.65] text-[var(--ink-secondary)]">
+                  {PROFILE.contact.availability}
+                </p>
+              </div>
+            </div>
           </div>
         </aside>
 
-        {/* Contact Form */}
-        <section aria-label="Send a message" className="lg:col-span-7">
-          <div className="rounded-2xl border border-[var(--border-neutral)] bg-[var(--bg-surface)] p-6 sm:p-8">
-            <h2 className="text-lg font-semibold tracking-[-0.015em] text-[var(--ink-primary)]">
+        {/* Right 7-Column Message Form Stage */}
+        <section
+          aria-label="Send a message"
+          className="lg:col-span-7 py-12 lg:py-16 lg:pl-12"
+        >
+          <div className="max-w-2xl">
+            <h2 className="font-serif font-normal text-[32px] lg:text-[38px] leading-[1.06] tracking-[-0.02em] text-[var(--ink-primary)]">
               Send a message
             </h2>
-            <p className="mt-1.5 text-sm text-[var(--ink-secondary)]">
+            <p className="mt-2.5 text-sm leading-[1.65] text-[var(--ink-secondary)]">
               Include a brief overview of what you are building and how I can
               help.
             </p>
-            <div className="mt-6">
+            <div className="mt-8">
               <ContactForm />
             </div>
           </div>
